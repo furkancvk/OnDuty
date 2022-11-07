@@ -10,12 +10,17 @@ class NewTaskScreen extends StatefulWidget {
 class _NewTaskScreenState extends State<NewTaskScreen> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("Create New Task"),
-
-
-      ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("New Task Screen"),
+        ),
+        body: Column(
+          children: const [
+            Text("New Task Screen"),
+          ],
+        ),
+      ),
     );
   }
 }

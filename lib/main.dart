@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'design/app_theme_data.dart';
 import 'routes/routes.dart';
 
-
-void main(){
-  runApp(MyApp());
+void main() {
+  runApp(const MyApp());
 }
-
-
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -22,14 +20,11 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: "On Duty",
       debugShowCheckedModeBanner: false,
-      /*theme: AppThemeData.lightTheme(context),
+      theme: AppThemeData.lightTheme(context),
       themeMode: ThemeMode.light,
-      darkTheme: AppThemeData.darkTheme(context),*/
+      darkTheme: AppThemeData.darkTheme(context),
       initialRoute: "login_screen",
       routes: routes,
-      //supportedLocales: const [Locale("en", "US"), Locale("tr", "TR")],
-
-
     );
   }
 }

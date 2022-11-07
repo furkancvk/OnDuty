@@ -10,16 +10,18 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("LogIn Page"),
-        ElevatedButton(
-          child: Text(" LogIn"),
-          onPressed: () {
-            Navigator.pushNamed(context, "home_screen");
-          },
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            const Text("Login Screen"),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, "sign_up_screen"),
+              child: const Text("Sign Up"),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

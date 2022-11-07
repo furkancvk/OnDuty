@@ -10,16 +10,18 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("SignUp Page"),
-        ElevatedButton(
-          child: Text(" SignUp"),
-          onPressed: () {
-            Navigator.pushNamed(context, "home_screen");
-          },
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            const Text("Sign Up Screen"),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, "home_screen"),
+              child: const Text("Home"),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

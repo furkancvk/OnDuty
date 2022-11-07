@@ -10,23 +10,26 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("Home Page"),
-        ElevatedButton(
-          child: Text("Create Task"),
-          onPressed: () {
-            Navigator.pushNamed(context, "new_task_screen");
-          },
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text("Home Screen"),
         ),
-        ElevatedButton(
-          child: Text("Task Details"),
-          onPressed: () {
-            Navigator.pushNamed(context, "task_details_screen");
-          },
+        body: Column(
+          children: [
+            const Text("Home Screen"),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, "new_task_screen"),
+              child: const Text("New Task"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, "edit_task_screen"),
+              child: const Text("Edit Task"),
+            ),
+          ],
         ),
-
-      ],
+      ),
     );
   }
 }
