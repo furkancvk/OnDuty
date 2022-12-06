@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:on_duty/views/sign_up.dart';
 import 'package:on_duty/widgets/app_form.dart';
+import 'package:page_transition/page_transition.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
@@ -77,7 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: AppText.context,
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, "sign_up_screen"),
+                        onTap: () => {
+                          Navigator.of(context).push(PageTransition(
+                              child: SignUpScreen(),
+                              duration: Duration(milliseconds: 400),
+                              type: PageTransitionType.rightToLeft)),
+                        },
                         child: const Text(
                           "tıklayın",
                           style: TextStyle(
