@@ -20,10 +20,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return SafeArea(
       child: Scaffold(
         body: ListView(
+          addAutomaticKeepAlives: false,
           padding: const EdgeInsets.all(24),
           children: [
-            Text("On Duty", style: AppText.headerSemiBold),
-            const SizedBox(height: 100),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Image.asset("assets/images/logo-onduty.png", height: 50),
+            ),
+            const SizedBox(height: 80),
             Form(
               key: _formKey,
               child: Column(
@@ -73,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: AppText.context,
                       ),
                       GestureDetector(
-                        onTap: () => print("TIKLADIN"),
+                        onTap: () => Navigator.pushNamed(context, "sign_up_screen"),
                         child: const Text(
                           "tıklayın",
                           style: TextStyle(
