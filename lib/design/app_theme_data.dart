@@ -24,7 +24,7 @@ class AppThemeData {
     scaffoldBackgroundColor: AppColors.lightSecondary,
 
     textTheme: const TextTheme(
-      button: TextStyle(
+      labelLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.4,
@@ -117,6 +117,11 @@ class AppThemeData {
       splashRadius: 28,
       side: const BorderSide(color: AppColors.lightPrimary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+    ),
+
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: AppColors.lightAccent,
+      contentTextStyle: TextStyle(color: AppColors.lightBlack)
     ),
 
     /*textTheme: const TextTheme(

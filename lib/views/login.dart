@@ -14,8 +14,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   bool isChecked = false;
+  bool isLoading = false;
+
+  void onTapClickMe(BuildContext context) {
+    Navigator.of(context).push(
+      PageTransition(
+        child: const SignUpScreen(),
+        duration: const Duration(milliseconds: 400),
+        type: PageTransitionType.rightToLeft,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   AppForm.appTextFormField(
                     label: "Email",
                     hint: "isminiz@domain.com",
-                    controller: TextEditingController(),
+                    controller: _emailController,
+                    isEmail: true,
                   ),
                   const SizedBox(height: 24),
                   PasswordFieldWithVisibility(
-                    controller: TextEditingController(),
+                    controller: _passwordController,
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -67,8 +82,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      onPressed: () => {},
-                      child: const Text("Giriş Yap"),
+                      onPressed: logIn,
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: AppColors.lightSecondary,
+                                strokeWidth: 3,
+                              ),
+                            )
+                          : const Text("Giriş Yap"),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -79,12 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: AppText.context,
                       ),
                       GestureDetector(
-                        onTap: () => {
-                          Navigator.of(context).push(PageTransition(
-                              child: SignUpScreen(),
-                              duration: Duration(milliseconds: 400),
-                              type: PageTransitionType.rightToLeft)),
-                        },
+                        onTap: () => onTapClickMe(context),
                         child: const Text(
                           "tıklayın",
                           style: TextStyle(
@@ -105,5 +124,60 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void logIn() async {
+    try {
+      if (_formKey.currentState!.validate()) {
+        /* await _auth.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        ); */
+        Navigator.pushReplacementNamed(context, "home_screen");
+        // AppAlerts.toast(message: "Başarılı bir şekilde giriş yapıldı");
+        // setState(() => isLoading = false);
+      }
+    } /* on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            padding: const EdgeInsets.all(0),
+            content: AppAlerts.appAlert(
+              title: "No user found for that email",
+              color: Colors.red,
+              icon: const Icon(Icons.clear),
+            ),
+            duration: const Duration(milliseconds: 1500),
+          ),
+        );
+      } else if (e.code == 'wrong-password') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            padding: const EdgeInsets.all(0),
+            content: AppAlerts.appAlert(
+              title: "Wrong password provided for that user",
+              color: Colors.red,
+              icon: const Icon(Icons.clear),
+            ),
+            duration: const Duration(milliseconds: 1500),
+          ),
+        );
+      }
+    } */ catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          padding: const EdgeInsets.all(20),
+          content: Text(e.toString()),
+          duration: const Duration(milliseconds: 1500),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }
