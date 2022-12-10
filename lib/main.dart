@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'design/app_theme_data.dart';
 import 'routes/routes.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  initializeDateFormatting('tr_TR', null).then((_) => runApp(const MyApp()));
+  // runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

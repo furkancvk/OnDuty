@@ -11,9 +11,11 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   fluentui_system_icons: ^1.1.185
+  iconsax: ^0.0.8
   fluttertoast: ^8.1.1
   autocomplete_textfield: ^2.0.1
   page_transition: ^2.0.9
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
