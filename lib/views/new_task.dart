@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/design/app_colors.dart';
 import 'package:on_duty/widgets/app_form.dart';
@@ -26,9 +27,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     'Item 5',
   ];
 
-  bool isSelected1 = false;
-  bool isSelected2 = false;
-  bool isSelected3 = false;
+  var index =0;
 
 
   @override
@@ -40,8 +39,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-
+          child: ListView(
             children:[
               AppForm.appTextFormField(label: "Başlık", hint: "Görevi tanımlayınız", controller: _headerController),
               SizedBox(height: 24,),
@@ -52,7 +50,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                 children: [
                   Expanded(
                       flex: 1,
-                      child: AppForm.appTextFormFieldIcon(label: "Son Tarih", hint: "Tarihi giriniz", icon: Icon(Icons.date_range), controller: _dateController)),
+                      child: AppForm.appTextFormFieldIcon(label: "Son Tarih", hint: "Tarihi giriniz", icon: Icon(FluentIcons.calendar_assistant_24_regular), controller: _dateController)),
                  SizedBox(width: 20,),
                   Expanded(
                     flex: 1,
@@ -67,15 +65,14 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                  child: Icon(Icons.person,color: AppColors.lightPrimary,)),
+                                  child: Icon(FluentIcons.person_24_regular,color: AppColors.lightPrimary,)),
                               Expanded(
                                 flex: 3,
                                 child: DropdownButton(
-
                                   underline: Container(),
                                   value: dropdownvalue,
                                   isExpanded: true,
-                                  icon: const Icon(Icons.keyboard_arrow_down,color: AppColors.lightPrimary,),
+                                  icon: const Icon(FluentIcons.chevron_down_24_regular,color: AppColors.lightPrimary,),
                                   items: items.map((String items) {
                                     return DropdownMenuItem(
                                       value: items,
@@ -106,43 +103,32 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                   Row(children: [
                     GestureDetector(
                       onTap: (){setState((){
-                        if(isSelected2)
-                          isSelected2=!isSelected2;
-                        if(isSelected3)
-                          isSelected3=!isSelected3;
-                        isSelected1=!isSelected1;});},
+                        index =1;
+                      });},
                       child: Container(
                         height: 30,
                         width: 30,
-                        decoration: BoxDecoration(color: AppColors.lightError,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: isSelected1 ? Colors.black : Colors.transparent )),
+                        decoration: BoxDecoration(color: AppColors.lightError,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: index==1 ? Colors.black : Colors.transparent )),
                       ),
                     ),
                     SizedBox(width: 24,),
                     GestureDetector(
                       onTap: (){setState((){
-                        if(isSelected1)
-                          isSelected1=!isSelected1;
-                        if(isSelected3)
-                          isSelected3=!isSelected3;
-                        isSelected2=!isSelected2;});},
+                        index =2;});},
                       child: Container(
                         height: 30,
                         width: 30,
-                        decoration: BoxDecoration(color: AppColors.lightWarning,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: isSelected2 ? Colors.black : Colors.transparent )),
+                        decoration: BoxDecoration(color: AppColors.lightWarning,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: index==2  ? Colors.black : Colors.transparent )),
                       ),
                     ),
                     SizedBox(width: 24,),
                     GestureDetector(
                       onTap: (){setState((){
-                        if(isSelected2)
-                          isSelected2=!isSelected2;
-                        if(isSelected1)
-                          isSelected1=!isSelected1;
-                        isSelected3=!isSelected3;});},
+                        index=3;});},
                       child: Container(
                         height: 30,
                         width: 30,
-                        decoration: BoxDecoration(color: AppColors.lightSuccess,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: isSelected3 ? Colors.black : Colors.transparent )),
+                        decoration: BoxDecoration(color: AppColors.lightSuccess,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: index==3  ? Colors.black : Colors.transparent )),
                       ),
                     ),
                   ],)
@@ -151,7 +137,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
               SizedBox(height: 32,),
               Align(
                   alignment:Alignment.centerRight,
-                  child: ElevatedButton.icon(icon: Icon(Icons.save),onPressed: (){}, label: Text("Kaydet")))
+                  child: ElevatedButton.icon(icon: Icon(FluentIcons.save_24_regular), onPressed: (){}, label: Text("Kaydet")))
 
             ],
           ),
