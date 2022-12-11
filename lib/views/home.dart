@@ -20,8 +20,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
   final Query _tasksStream = FirebaseFirestore.instance.collection('tasks');
+  final TextEditingController _searchController = TextEditingController();
 
   bool isAdmin = true;
+  String _searchQuery = "";
 
   void logOut() {
     _auth.signOut().then((value) => {
@@ -168,8 +170,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   flex: 1,
                   child: TextFormField(
-                    controller: TextEditingController(),
-                    onChanged: (query) => {},
+                    controller: _searchController,
+                    onChanged: (String value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
                     decoration: const InputDecoration(
                       suffixIcon: Icon(
                         FluentIcons.search_24_filled,
@@ -260,6 +266,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   } else {
                     List tasks = snapshot.data!.docs.map((doc) => doc).toList();
+                    tasks = tasks
+                        .where((s) => s['title']
+                        .toLowerCase()
+                        .contains(_searchQuery.toLowerCase()))
+                        .toList();
                     return Column(
                       children: tasks.map((task) {
                         return Column(
@@ -336,5 +347,11 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
