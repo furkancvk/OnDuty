@@ -268,6 +268,9 @@ class AppForm {
     );
   }
 
+
+
+
   // static Widget appSearchableDropDownField({
   //   required List<String> items,
   //   required String label,
@@ -284,11 +287,11 @@ class AppForm {
   //           Text(label, style: AppText.labelSemiBold),
   //           isRequired
   //               ? const Text("*",
-  //                   style: TextStyle(
-  //                     fontSize: 14,
-  //                     fontWeight: FontWeight.w600,
-  //                     color: AppColors.lightError,
-  //                   ))
+  //               style: TextStyle(
+  //                 fontSize: 14,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: AppColors.lightError,
+  //               ))
   //               : const Text(""),
   //         ],
   //       ),
@@ -308,6 +311,7 @@ class AppForm {
   //     ],
   //   );
   // }
+
 }
 
 class PasswordFieldWithVisibility extends StatefulWidget {
