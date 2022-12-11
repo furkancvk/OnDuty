@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/design/app_colors.dart';
@@ -14,8 +15,8 @@ class EditTaskScreen extends StatefulWidget {
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
 
-  TextEditingController _headerController = TextEditingController();
-  TextEditingController _contentController = TextEditingController();
+  TextEditingController _titleController = TextEditingController();
+  TextEditingController _describeController = TextEditingController();
   TextEditingController _dateController = TextEditingController();
 
   String dropdownvalue = 'Item 1';
@@ -29,6 +30,13 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
 
   var index =0;
 
+  void getTask() async {
+    CollectionReference tasks = FirebaseFirestore.instance.collection('tasks');
+    var data = await tasks.get();
+    print(data.docs[1].data());
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,9 +49,9 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           padding: const EdgeInsets.all(24.0),
           child: ListView(
             children:[
-              AppForm.appTextFormField(label: "Başlık", hint: "Görevi tanımlayınız", controller: _headerController),
+              AppForm.appTextFormField(label: "Başlık", hint: "Görevi tanımlayınız", controller: _titleController),
               SizedBox(height: 24,),
-              AppForm.appTextFormField(label: "İçerik", hint: "Görevi özetleyiniz", controller: _contentController,maxLines: 5),
+              AppForm.appTextFormField(label: "İçerik", hint: "Görevi özetleyiniz", controller: _describeController,maxLines: 5),
               SizedBox(height: 24,),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -137,7 +145,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               SizedBox(height: 32,),
               Align(
                   alignment:Alignment.centerRight,
-                  child: ElevatedButton.icon(icon: Icon(FluentIcons.save_24_regular),onPressed: (){}, label: Text("Değişikilikleri Kaydet")))
+                  child: ElevatedButton.icon(icon: Icon(FluentIcons.save_24_regular),onPressed: getTask, label: Text("Değişikilikleri Kaydet")))
 
             ],
           ),

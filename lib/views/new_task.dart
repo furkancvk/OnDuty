@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/design/app_colors.dart';
 import 'package:on_duty/widgets/app_form.dart';
-
 import '../design/app_text.dart';
+
 
 class NewTaskScreen extends StatefulWidget {
   const NewTaskScreen({Key? key}) : super(key: key);
@@ -14,11 +15,13 @@ class NewTaskScreen extends StatefulWidget {
 
 class _NewTaskScreenState extends State<NewTaskScreen> {
 
-  TextEditingController _headerController = TextEditingController();
-  TextEditingController _contentController = TextEditingController();
+
+
+  TextEditingController _titleController = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
   TextEditingController _dateController = TextEditingController();
 
-  String dropdownvalue = 'Item 1';
+
   var items = [
     'Item 1',
     'Item 2',
@@ -27,7 +30,27 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     'Item 5',
   ];
 
-  var index =0;
+  String dropdownvalue = 'Kullanıcı';
+
+  var index =1;
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  void addTask() {
+    CollectionReference tasks = FirebaseFirestore.instance.collection('tasks');
+     tasks
+        .add({
+       'title': _titleController.text,
+       'description': _descriptionController.text,
+       'importance':index,
+       'employeeId':dropdownvalue,
+       'createdAt':DateTime.now(),
+       'dueDate':_dateController.text,
+    })
+        .then((value) => {print("Task Added"),Navigator.pop(context)})
+        .catchError((error) => print("Failed to add task: $error"));
+
+  }
 
 
   @override
@@ -41,9 +64,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
           padding: const EdgeInsets.all(24.0),
           child: ListView(
             children:[
-              AppForm.appTextFormField(label: "Başlık", hint: "Görevi tanımlayınız", controller: _headerController),
+              AppForm.appTextFormField(label: "Başlık", hint: "Görevi tanımlayınız", controller: _titleController),
               SizedBox(height: 24,),
-              AppForm.appTextFormField(label: "İçerik", hint: "Görevi özetleyiniz", controller: _contentController,maxLines: 5),
+              AppForm.appTextFormField(label: "İçerik", hint: "Görevi özetleyiniz", controller: _descriptionController,maxLines: 5),
               SizedBox(height: 24,),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -137,7 +160,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
               SizedBox(height: 32,),
               Align(
                   alignment:Alignment.centerRight,
-                  child: ElevatedButton.icon(icon: Icon(FluentIcons.save_24_regular), onPressed: (){}, label: Text("Kaydet")))
+                  child: ElevatedButton.icon(icon: Icon(FluentIcons.save_24_regular), onPressed:addTask, label: Text("Kaydet")))
 
             ],
           ),
