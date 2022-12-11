@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
+import '../models/user.dart';
 import '../utils/helpers.dart';
 import '../widgets/app_cards.dart';
 
@@ -20,33 +21,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
   final Query _tasksStream = FirebaseFirestore.instance.collection('tasks');
+  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
   final TextEditingController _searchController = TextEditingController();
 
-  bool isAdmin = true;
+  late bool isAdmin;
   String _searchQuery = "";
   String _displayName = "";
 
-  void logOut() {
-    _auth.signOut().then((value) => {
-          Navigator.pushReplacementNamed(context, 'login_screen'),
-        });
-  }
-
-  Color setImportanceColor(int level) {
-    switch (level) {
-      case 1:
-        return AppColors.lightSuccess;
-      case 2:
-        return AppColors.lightWarning;
-      default:
-        return AppColors.lightError;
-    }
+  @override
+  void initState() {
+    super.initState();
+    isAdmin = false;
+    setDisplayName();
+    setIsAdmin();
   }
 
   @override
   Widget build(BuildContext context) {
-    _displayName = _auth.currentUser!.displayName.toString();
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -350,6 +341,42 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
     );
+  }
+
+  void setDisplayName() {
+    setState(() {
+      _displayName = _auth.currentUser!.displayName.toString();
+    });
+  }
+
+  void setIsAdmin() async {
+    final docSnap = await _users.withConverter(
+      fromFirestore: UserModel.fromFirestore,
+      toFirestore: (UserModel user, options) => user.toFirestore(),
+    ).doc(_auth.currentUser!.uid).get();
+
+    final currentUser = docSnap.data();
+
+    setState(() {
+      isAdmin = (currentUser?.isAdmin ?? false);
+    });
+  }
+
+  void logOut() {
+    _auth.signOut().then((value) => {
+      Navigator.pushReplacementNamed(context, 'login_screen'),
+    });
+  }
+
+  Color setImportanceColor(int level) {
+    switch (level) {
+      case 1:
+        return AppColors.lightSuccess;
+      case 2:
+        return AppColors.lightWarning;
+      default:
+        return AppColors.lightError;
+    }
   }
 
   @override

@@ -7,7 +7,7 @@ class UserModel {
   String? email;
   bool? isAdmin;
   String? password;
-  DateTime? createdAt;
+  Timestamp? createdAt;
 
   // DateTime? updatedAt;
 
@@ -29,7 +29,7 @@ class UserModel {
         email: json["email"] as String,
         isAdmin: json["isAdmin"] as bool,
         password: json["password"] as String,
-        createdAt: json["createdAt"] as DateTime,
+        createdAt: json["createdAt"] as Timestamp,
         // updatedAt: json["updatedAt"] as DateTime,
       );
 

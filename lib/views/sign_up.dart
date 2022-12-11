@@ -206,7 +206,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       lastName: _lastnameController.text,
       email: _emailController.text,
       isAdmin: false,
-      createdAt: DateTime.now(),
+      createdAt: Timestamp.now(),
     );
 
     _users.withConverter(
