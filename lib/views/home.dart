@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -18,100 +19,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
-
-  List<Map<String, dynamic>> tasks = [
-    {
-      "id": 0,
-      "importance": 3,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "13/12/2022",
-      "fullName": "Burak Yalnız",
-    },
-    {
-      "id": 1,
-      "importance": 3,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "12/12/2022",
-      "fullName": "Burak Yalnız",
-    },
-    {
-      "id": 2,
-      "importance": 2,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "20/12/2022",
-      "fullName": "Burak Yalnız",
-    },
-    {
-      "id": 2,
-      "importance": 1,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "01/01/2023",
-      "fullName": "Burak Yalnız",
-    },
-    {
-      "id": 3,
-      "importance": 1,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "03/02/2023",
-      "fullName": "Burak Yalnız",
-    }
-  ];
-
-  List<Map<String, dynamic>> tasksAdmin = [
-    {
-      "id": 0,
-      "importance": 3,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "13/12/2022",
-      "fullName": "Abdulkadir Eyigül",
-    },
-    {
-      "id": 1,
-      "importance": 3,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "12/12/2022",
-      "fullName": "Furkan Çevik",
-    },
-    {
-      "id": 2,
-      "importance": 2,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "20/12/2022",
-      "fullName": "Kahraman Karadavut",
-    },
-    {
-      "id": 2,
-      "importance": 1,
-      "title": "Başlık",
-      "task":
-          "Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.",
-      "date": "01/01/2023",
-      "fullName": "Sefa Akyüz",
-    },
-  ];
+  final Query _tasksStream = FirebaseFirestore.instance.collection('tasks');
 
   bool isAdmin = true;
 
   void logOut() {
     _auth.signOut().then((value) => {
-      Navigator.pushReplacementNamed(context, 'login_screen'),
-    });
+          Navigator.pushReplacementNamed(context, 'login_screen'),
+        });
   }
 
   Color setImportanceColor(int level) {
@@ -145,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 PopupMenuButton<int>(
                   onSelected: (value) {
                     // if(value == 1) Navigator.pushNamed(context, "help_view");
-                    if(value == 4) logOut();
+                    if (value == 4) logOut();
                   },
                   tooltip: "Profil Menüsü",
                   padding: const EdgeInsets.all(8),
@@ -331,70 +246,91 @@ class _HomeScreenState extends State<HomeScreen> {
               style: AppText.titleSemiBold,
             ),
             const SizedBox(height: 16),
-            Column(
-              children: (isAdmin ? tasksAdmin : tasks).map((task) {
-                return Column(
-                  children: [
-                    if ((isAdmin ? tasksAdmin : tasks).indexOf(task) != 0)
-                      const SizedBox(height: 24),
-                    AppCards.taskCard(
-                      color: setImportanceColor(task["importance"]),
-                      title: task["title"],
-                      task: task["task"],
-                      date: task["date"],
-                      context: context,
-                      fullName: task["fullName"],
-                      itemBuilder: (context) => [
-                        if(isAdmin) PopupMenuItem(
-                          value: 1,
-                          child: Row(
-                            children: [
-                              const Icon(
-                                FluentIcons.edit_24_regular,
-                                color: AppColors.lightPrimary,
-                              ),
-                              const SizedBox(width: 10),
-                              Text("Düzenle", style: AppText.contextSemiBold),
-                            ],
-                          ),
-                        ),
-                        if(isAdmin) PopupMenuItem(
-                          value: 2,
-                          child: Row(
-                            children: [
-                              const Icon(
-                                FluentIcons.delete_24_regular,
-                                color: AppColors.lightPrimary,
-                              ),
-                              const SizedBox(width: 10),
-                              Text("Sil", style: AppText.contextSemiBold),
-                            ],
-                          ),
-                        ),
-                        if(!isAdmin) PopupMenuItem(
-                          value: 3,
-                          child: Row(
-                            children: [
-                              const Icon(
-                                FluentIcons.check_24_regular,
-                                color: AppColors.lightPrimary,
-                              ),
-                              const SizedBox(width: 10),
-                              Text("Tamamla", style: AppText.contextSemiBold),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
+            StreamBuilder<QuerySnapshot>(
+                stream: _tasksStream.orderBy('importance', descending: true).snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text('Something went wrong');
+                  } else if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: 300,
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  } else {
+                    List tasks = snapshot.data!.docs.map((doc) => doc).toList();
+                    return Column(
+                      children: tasks.map((task) {
+                        return Column(
+                          children: [
+                            AppCards.taskCard(
+                              color: setImportanceColor(task["importance"]),
+                              title: task["title"],
+                              task: task["description"],
+                              date: task["dueDate"],
+                              context: context,
+                              fullName: "name",
+                              itemBuilder: (context) => [
+                                if (isAdmin)
+                                  PopupMenuItem(
+                                    value: 1,
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          FluentIcons.edit_24_regular,
+                                          color: AppColors.lightPrimary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text("Düzenle",
+                                            style: AppText.contextSemiBold),
+                                      ],
+                                    ),
+                                  ),
+                                if (isAdmin)
+                                  PopupMenuItem(
+                                    value: 2,
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          FluentIcons.delete_24_regular,
+                                          color: AppColors.lightPrimary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text("Sil", style: AppText.contextSemiBold),
+                                      ],
+                                    ),
+                                  ),
+                                if (!isAdmin)
+                                  PopupMenuItem(
+                                    value: 3,
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          FluentIcons.check_24_regular,
+                                          color: AppColors.lightPrimary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text("Tamamla",
+                                            style: AppText.contextSemiBold),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  }
+                }),
           ],
         ),
         floatingActionButton: isAdmin
             ? FloatingActionButton(
-                onPressed: () => Navigator.of(context).pushNamed("new_task_screen"),
+                onPressed: () =>
+                    Navigator.of(context).pushNamed("new_task_screen"),
                 child: const Icon(Icons.add),
               )
             : null,

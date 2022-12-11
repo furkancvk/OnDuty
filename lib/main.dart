@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -22,6 +23,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,7 +33,7 @@ class _MyAppState extends State<MyApp> {
       theme: AppThemeData.lightTheme(context),
       themeMode: ThemeMode.light,
       darkTheme: AppThemeData.darkTheme(context),
-      initialRoute: "login_screen",
+      initialRoute: _auth.currentUser != null ? "home_screen" : "login_screen",
       routes: routes,
     );
   }

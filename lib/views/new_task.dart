@@ -30,7 +30,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     'Item 5',
   ];
 
-  String dropdownvalue = 'Kullanıcı';
+  String dropdownvalue = 'Item 1';
 
   var index =1;
 
