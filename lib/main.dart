@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:on_duty/firebase_options.dart';
 
 import 'design/app_theme_data.dart';
 import 'routes/routes.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp( options:DefaultFirebaseOptions.currentPlatform,);
   initializeDateFormatting('tr_TR', null).then((_) => runApp(const MyApp()));
   // runApp(const MyApp());
 }

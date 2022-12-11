@@ -6,6 +6,7 @@ import '../design/app_colors.dart';
 import '../design/app_text.dart';
 import '../widgets/app_alerts.dart';
 import '../widgets/app_form.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -23,6 +24,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isChecked = false;
   bool isLoading = false;
+
+  final _auth=FirebaseAuth.instance;
+
+
 
   void onTapClickMe(BuildContext context) {
     Navigator.of(context).push(
@@ -188,19 +193,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void signUp() async {
     try {
       if (_formKey.currentState!.validate()) {
-        /* await _auth.createUserWithEmailAndPassword(
+         await _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
-        final CollectionReference _logs =
-        FirebaseFirestore.instance.collection('logs');
-        _userLog = {
-          "user_id": _auth.currentUser!.uid,
-          "movie_dataset": [],
-          "watched": [],
-          "created": DateTime.now(),
-        };
-        await _logs.doc((_auth.currentUser!.uid)).set(_userLog).then((value) => null).catchError((error) => null); */
+        // final CollectionReference _logs =
+        // FirebaseFirestore.instance.collection('logs');
+        // _userLog = {
+        //   "user_id": _auth.currentUser!.uid,
+        //   "movie_dataset": [],
+        //   "watched": [],
+        //   "created": DateTime.now(),
+        // };
+        // await _logs.doc((_auth.currentUser!.uid)).set(_userLog).then((value) => null).catchError((error) => null);
         if(isChecked){
           Navigator.pushReplacementNamed(context, 'home_screen');
         } else {
@@ -228,6 +233,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
       }
     } */ catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           padding: const EdgeInsets.all(20),
