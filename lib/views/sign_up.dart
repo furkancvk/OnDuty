@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:on_duty/models/user.dart';
 import 'package:on_duty/views/login.dart';
 import 'package:on_duty/widgets/app_alerts.dart';
 import 'package:page_transition/page_transition.dart';
@@ -17,6 +19,8 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _auth = FirebaseAuth.instance;
+  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
+
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -25,16 +29,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isChecked = false;
   bool isLoading = false;
-
-  void onTapClickMe(BuildContext context) {
-    Navigator.of(context).push(
-      PageTransition(
-        child: const LoginScreen(),
-        duration: const Duration(milliseconds: 400),
-        type: PageTransitionType.rightToLeft,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +190,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  void onTapClickMe(BuildContext context) {
+    Navigator.of(context).push(
+      PageTransition(
+        child: const LoginScreen(),
+        duration: const Duration(milliseconds: 400),
+        type: PageTransitionType.rightToLeft,
+      ),
+    );
+  }
+
+  void addUser() {
+    UserModel newUser = UserModel(
+      firstName: _firstnameController.text,
+      lastName: _lastnameController.text,
+      email: _emailController.text,
+      isAdmin: false,
+      createdAt: DateTime.now(),
+    );
+
+    _users.withConverter(
+      fromFirestore: UserModel.fromFirestore,
+      toFirestore: (UserModel newUser, options) => newUser.toFirestore(),
+    ).doc(_auth.currentUser!.uid).set(newUser);
+  }
+
   void signUp() async {
     if (_formKey.currentState!.validate()) {
       if (isChecked) {
@@ -204,6 +223,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           email: _emailController.text,
           password: _passwordController.text,
         ).then((value) => {
+          addUser(),
+          _auth.currentUser!.updateDisplayName(_firstnameController.text),
           setState(() => isLoading = false),
           Navigator.pushReplacementNamed(context, 'home_screen'),
           AppAlerts.toast(message: "Başarıyla giriş yapıldı."),

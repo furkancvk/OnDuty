@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isAdmin = true;
   String _searchQuery = "";
+  String _displayName = "";
 
   void logOut() {
     _auth.signOut().then((value) => {
@@ -44,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _displayName = _auth.currentUser!.displayName.toString();
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -148,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text("Hoş geldin, ", style: AppText.labelSemiBold),
                     Text(
-                      Helpers.titleCase("burak"),
+                      Helpers.titleCase(_displayName),
                       style: AppText.label,
                     ),
                   ],
