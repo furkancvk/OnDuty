@@ -1,12 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/views/login.dart';
+import 'package:on_duty/widgets/app_alerts.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
-import '../widgets/app_alerts.dart';
 import '../widgets/app_form.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -16,6 +16,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final _auth = FirebaseAuth.instance;
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -24,10 +25,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isChecked = false;
   bool isLoading = false;
-
-  final _auth=FirebaseAuth.instance;
-
-
 
   void onTapClickMe(BuildContext context) {
     Navigator.of(context).push(
@@ -154,7 +151,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
                       onPressed: signUp,
-                      child: const Text("Kaydol"),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: AppColors.lightSecondary,
+                                strokeWidth: 3,
+                              ),
+                            )
+                          : const Text("Kaydol"),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -191,56 +197,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void signUp() async {
-    try {
-      if (_formKey.currentState!.validate()) {
-         await _auth.createUserWithEmailAndPassword(
+    if (_formKey.currentState!.validate()) {
+      if (isChecked) {
+        setState(() => isLoading = true);
+        _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
-        );
-        // final CollectionReference _logs =
-        // FirebaseFirestore.instance.collection('logs');
-        // _userLog = {
-        //   "user_id": _auth.currentUser!.uid,
-        //   "movie_dataset": [],
-        //   "watched": [],
-        //   "created": DateTime.now(),
-        // };
-        // await _logs.doc((_auth.currentUser!.uid)).set(_userLog).then((value) => null).catchError((error) => null);
-        if(isChecked){
-          Navigator.pushReplacementNamed(context, 'home_screen');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              padding: EdgeInsets.all(20),
-              content: Text("Kaydolmak için kutucuğu işaretleyiniz."),
-              duration: Duration(milliseconds: 1500),
+        ).then((value) => {
+          setState(() => isLoading = false),
+          Navigator.pushReplacementNamed(context, 'home_screen'),
+          AppAlerts.toast(message: "Başarıyla giriş yapıldı."),
+        }).catchError((e) => {
+          setState(() => isLoading = false),
+          if (e.code == 'email-already-in-use') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                padding: EdgeInsets.all(20),
+                content: Text("Bu email zaten kullanılmaktadır."),
+                duration: Duration(milliseconds: 1500),
+              ),
             ),
-          );
-        }
-      }
-    } /* on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                padding: const EdgeInsets.all(20),
+                content: Text(e.toString()),
+                duration: const Duration(milliseconds: 1500),
+              ),
+            ),
+          },
+        });
+      } else {
+        setState(() => isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            padding: const EdgeInsets.all(0),
-            content: AppAlerts.appAlert(
-              title: "An account already exists for that email",
-              color: Colors.red,
-              icon: const Icon(Icons.clear),
-            ),
-            duration: const Duration(milliseconds: 1500),
+          const SnackBar(
+            padding: EdgeInsets.all(20),
+            content: Text("Kaydolmak için kutucuğu işaretleyiniz."),
+            duration: Duration(milliseconds: 1500),
           ),
         );
       }
-    } */ catch (e) {
-      print(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          padding: const EdgeInsets.all(20),
-          content: Text(e.toString()),
-          duration: const Duration(milliseconds: 1500),
-        ),
-      );
     }
   }
 

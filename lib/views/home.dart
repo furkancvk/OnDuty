@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -16,6 +17,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _auth = FirebaseAuth.instance;
+
   List<Map<String, dynamic>> tasks = [
     {
       "id": 0,
@@ -105,6 +108,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isAdmin = true;
 
+  void logOut() {
+    _auth.signOut().then((value) => {
+      Navigator.pushReplacementNamed(context, 'login_screen'),
+    });
+  }
+
   Color setImportanceColor(int level) {
     switch (level) {
       case 1:
@@ -136,6 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 PopupMenuButton<int>(
                   onSelected: (value) {
                     // if(value == 1) Navigator.pushNamed(context, "help_view");
+                    if(value == 4) logOut();
                   },
                   tooltip: "Profil Menüsü",
                   padding: const EdgeInsets.all(8),
@@ -180,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     PopupMenuItem(
-                      onTap: () => {},
                       value: 4,
                       child: Row(
                         children: [

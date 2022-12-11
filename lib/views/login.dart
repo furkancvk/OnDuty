@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/views/sign_up.dart';
 import 'package:on_duty/widgets/app_form.dart';
@@ -5,6 +6,7 @@ import 'package:page_transition/page_transition.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
+import '../widgets/app_alerts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -14,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -127,50 +130,31 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void logIn() async {
-    try {
-      if (_formKey.currentState!.validate()) {
-        /* await _auth.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        ); */
-        Navigator.pushReplacementNamed(context, "home_screen");
-        // AppAlerts.toast(message: "Başarılı bir şekilde giriş yapıldı");
-        // setState(() => isLoading = false);
-      }
-    } /* on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            padding: const EdgeInsets.all(0),
-            content: AppAlerts.appAlert(
-              title: "No user found for that email",
-              color: Colors.red,
-              icon: const Icon(Icons.clear),
+    if (_formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
+      _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      ).then((value) => {
+        setState(() => isLoading = false),
+        Navigator.pushReplacementNamed(context, 'home_screen'),
+        AppAlerts.toast(message: "Başarıyla giriş yapıldı."),
+      }).catchError((e) => {
+        setState(() => isLoading = false),
+        if (e.code == 'user-not-found') {
+          AppAlerts.toast(message: "Kullanıcı bulunamadı."),
+        } else if (e.code == 'wrong-password') {
+          AppAlerts.toast(message: "Yanlış şifre."),
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              padding: const EdgeInsets.all(20),
+              content: Text(e.toString()),
+              duration: const Duration(milliseconds: 1500),
             ),
-            duration: const Duration(milliseconds: 1500),
           ),
-        );
-      } else if (e.code == 'wrong-password') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            padding: const EdgeInsets.all(0),
-            content: AppAlerts.appAlert(
-              title: "Wrong password provided for that user",
-              color: Colors.red,
-              icon: const Icon(Icons.clear),
-            ),
-            duration: const Duration(milliseconds: 1500),
-          ),
-        );
-      }
-    } */ catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          padding: const EdgeInsets.all(20),
-          content: Text(e.toString()),
-          duration: const Duration(milliseconds: 1500),
-        ),
-      );
+        }
+      });
     }
   }
 
