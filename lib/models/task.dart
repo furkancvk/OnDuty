@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'user.dart';
+import 'package:on_duty/models/user.dart';
 
 class TaskModel {
   String? uid;
@@ -8,8 +7,8 @@ class TaskModel {
   String? description;
   int? importance;
   UserModel? user;
-  DateTime? dueDate;
-  DateTime? createdAt;
+  String? dueDate;
+  Timestamp? createdAt;
 
   // DateTime? updatedAt;
 
@@ -25,13 +24,13 @@ class TaskModel {
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
-        uid: json["uid"] as String,
+        uid: json["uid"] as String?,
         title: json["title"] as String,
         description: json["description"] as String,
         importance: json["importance"] as int,
         user: UserModel.fromJson(json["user"]),
-        dueDate: json["dueDate"] as DateTime,
-        createdAt: json["createdAt"] as DateTime,
+        dueDate: json["dueDate"] as String,
+        createdAt: json["createdAt"] as Timestamp,
         // updatedAt: json["updatedAt"] as DateTime,
       );
 
@@ -40,7 +39,7 @@ class TaskModel {
         "title": title,
         "description": description,
         "importance": importance,
-        "user": user,
+        "user": user?.toJson(),
         "dueDate": dueDate,
         "createdAt": createdAt,
         // "updatedAt": updatedAt,
@@ -56,7 +55,7 @@ class TaskModel {
       title: data?['title'],
       description: data?['description'],
       importance: data?['importance'],
-      user: data?['user'],
+      user: UserModel.fromJson(data?["user"]),
       dueDate: data?['dueDate'],
       createdAt: data?['createdAt'],
     );
@@ -68,7 +67,7 @@ class TaskModel {
       if (title != null) "title": title,
       if (description != null) "description": description,
       if (importance != null) "importance": importance,
-      if (user != null) "user": user,
+      if (user != null) "user": user?.toFirestore(),
       if (dueDate != null) "dueDate": dueDate,
       if (createdAt != null) "createdAt": createdAt,
     };

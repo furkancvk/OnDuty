@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
+import '../models/task.dart';
 import '../models/user.dart';
 import '../utils/helpers.dart';
 import '../widgets/app_cards.dart';
@@ -20,7 +21,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
-  final Query _tasksStream = FirebaseFirestore.instance.collection('tasks');
+
+  final _tasksStream = FirebaseFirestore.instance.collection('tasks').withConverter<TaskModel>(
+    fromFirestore: TaskModel.fromFirestore,
+    toFirestore: (TaskModel task, options) => task.toFirestore(),
+  );
   final CollectionReference _users = FirebaseFirestore.instance.collection('users');
   final TextEditingController _searchController = TextEditingController();
 
@@ -181,6 +186,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(4),
                           topLeft: Radius.circular(4),
+                          topRight: Radius.circular(4),
+                          bottomRight: Radius.circular(4),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
@@ -188,12 +195,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(4),
                           topLeft: Radius.circular(4),
+                          topRight: Radius.circular(4),
+                          bottomRight: Radius.circular(4),
                         ),
                       ),
                     ),
                   ),
                 ),
-                PopupMenuButton<int>(
+                /*PopupMenuButton<int>(
                   tooltip: "Filtrele",
                   padding: const EdgeInsets.all(8),
                   itemBuilder: (context) => [
@@ -237,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                ),
+                ),*/
               ],
             ),
             const SizedBox(height: 24),
@@ -246,8 +255,8 @@ class _HomeScreenState extends State<HomeScreen> {
               style: AppText.titleSemiBold,
             ),
             const SizedBox(height: 16),
-            StreamBuilder<QuerySnapshot>(
-                stream: _tasksStream.orderBy('importance', descending: true).snapshots(),
+            StreamBuilder<QuerySnapshot<TaskModel>>(
+                stream: _tasksStream.orderBy('importance', descending: false).orderBy('createdAt', descending: true).snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) {
                     return const Text('Something went wrong');
@@ -259,23 +268,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   } else {
-                    List tasks = snapshot.data!.docs.map((doc) => doc).toList();
+                    List tasks = snapshot.data!.docs.map((doc) {
+                      TaskModel taskData = doc.data() as TaskModel;
+                      taskData.uid = doc.id;
+                      return taskData;
+                    }).toList();
+
                     tasks = tasks
-                        .where((s) => s['title']
+                        .where((s) => s.title
                         .toLowerCase()
                         .contains(_searchQuery.toLowerCase()))
                         .toList();
+
                     return Column(
                       children: tasks.map((task) {
+
                         return Column(
                           children: [
                             AppCards.taskCard(
-                              color: setImportanceColor(task["importance"]),
-                              title: task["title"],
-                              task: task["description"],
-                              date: task["dueDate"],
+                              task: task,
                               context: context,
-                              fullName: "name",
                               itemBuilder: (context) => [
                                 if (isAdmin)
                                   PopupMenuItem(
@@ -362,21 +374,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<UserModel?> getUser(String id) async {
+    final docSnap = await _users.withConverter(
+      fromFirestore: UserModel.fromFirestore,
+      toFirestore: (UserModel user, options) => user.toFirestore(),
+    ).doc(id).get();
+
+    return docSnap.data();
+  }
+
   void logOut() {
     _auth.signOut().then((value) => {
       Navigator.pushReplacementNamed(context, 'login_screen'),
     });
-  }
-
-  Color setImportanceColor(int level) {
-    switch (level) {
-      case 1:
-        return AppColors.lightSuccess;
-      case 2:
-        return AppColors.lightWarning;
-      default:
-        return AppColors.lightError;
-    }
   }
 
   @override

@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/design/app_colors.dart';
+import 'package:on_duty/models/task.dart';
 import 'package:on_duty/widgets/app_form.dart';
-import '../design/app_text.dart';
 
+import '../design/app_text.dart';
+import '../models/user.dart';
 
 class NewTaskScreen extends StatefulWidget {
   const NewTaskScreen({Key? key}) : super(key: key);
@@ -14,99 +17,145 @@ class NewTaskScreen extends StatefulWidget {
 }
 
 class _NewTaskScreenState extends State<NewTaskScreen> {
+  final _auth = FirebaseAuth.instance;
+  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
+  final CollectionReference _tasks = FirebaseFirestore.instance.collection('tasks');
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _dueDateController = TextEditingController();
 
+  List<UserModel> users = [];
+  UserModel selectedUser = UserModel();
 
+  void getUsers() async {
+    final docSnap = await _users.withConverter(
+      fromFirestore: UserModel.fromFirestore,
+      toFirestore: (UserModel user, options) => user.toFirestore(),
+    ).get();
 
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _dateController = TextEditingController();
-
-
-  var items = [
-    'Item 1',
-    'Item 2',
-    'Item 3',
-    'Item 4',
-    'Item 5',
-  ];
-
-  String dropdownvalue = 'Item 1';
-
-  var index =1;
-
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  void addTask() {
-    CollectionReference tasks = FirebaseFirestore.instance.collection('tasks');
-     tasks
-        .add({
-       'title': _titleController.text,
-       'description': _descriptionController.text,
-       'importance':index,
-       'employeeId':dropdownvalue,
-       'createdAt':DateTime.now(),
-       'dueDate':_dateController.text,
-    })
-        .then((value) => {print("Task Added"),Navigator.pop(context)})
-        .catchError((error) => print("Failed to add task: $error"));
-
+    final data = docSnap.docs.where((doc) => doc.id != _auth.currentUser?.uid).toList();
+    setState(() {
+      users = data.map((doc) {
+        UserModel userData = doc.data();
+        userData.uid = doc.id;
+        return userData;
+      }).toList();
+      selectedUser = users[0];
+    });
   }
 
+  int importance = 1;
+  
+  void addTask() {
+    TaskModel newTask = TaskModel(
+      title: _titleController.text,
+      description: _descriptionController.text,
+      importance: importance,
+      user: selectedUser,
+      dueDate: _dueDateController.text,
+      createdAt: Timestamp.now(),
+    );
+
+    _tasks.withConverter(
+      fromFirestore: TaskModel.fromFirestore,
+      toFirestore: (TaskModel task, options) => task.toFirestore(),
+    ).add(newTask).then((value) => Navigator.pop(context));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Görev Oluştur"),
-        ),
+        appBar: AppBar(title: const Text("Görev Oluştur")),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
           child: ListView(
-            children:[
-              AppForm.appTextFormField(label: "Başlık", hint: "Görevi tanımlayınız", controller: _titleController),
-              SizedBox(height: 24,),
-              AppForm.appTextFormField(label: "İçerik", hint: "Görevi özetleyiniz", controller: _descriptionController,maxLines: 5),
-              SizedBox(height: 24,),
+            children: [
+              AppForm.appTextFormField(
+                label: "Başlık",
+                hint: "Görevi tanımlayınız",
+                controller: _titleController,
+              ),
+              const SizedBox(height: 24),
+              AppForm.appTextFormField(
+                label: "İçerik",
+                hint: "Görevi özetleyiniz",
+                controller: _descriptionController,
+                maxLines: 5,
+              ),
+              const SizedBox(height: 24),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                      flex: 1,
-                      child: AppForm.appTextFormFieldIcon(label: "Son Tarih", hint: "Tarihi giriniz", icon: Icon(FluentIcons.calendar_assistant_24_regular), controller: _dateController)),
-                 SizedBox(width: 20,),
+                    flex: 1,
+                    child: AppForm.appTextFormFieldIcon(
+                      label: "Son Tarih",
+                      hint: "Tarihi giriniz",
+                      icon: const Icon(
+                        FluentIcons.calendar_assistant_24_regular,
+                      ),
+                      controller: _dueDateController,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
                   Expanded(
                     flex: 1,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Görevli Personel",style: AppText.labelSemiBold),
+                        Text("Görevli Personel", style: AppText.labelSemiBold),
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: AppColors.lightPrimary),),
+                            border: Border.all(color: AppColors.lightPrimary),
+                          ),
                           child: Row(
                             children: [
-                              Expanded(
-                                  child: Icon(FluentIcons.person_24_regular,color: AppColors.lightPrimary,)),
+                              const Expanded(
+                                child: Icon(
+                                  FluentIcons.person_24_regular,
+                                  color: AppColors.lightPrimary,
+                                ),
+                              ),
                               Expanded(
                                 flex: 3,
                                 child: DropdownButton(
                                   underline: Container(),
-                                  value: dropdownvalue,
+                                  value: selectedUser,
                                   isExpanded: true,
-                                  icon: const Icon(FluentIcons.chevron_down_24_regular,color: AppColors.lightPrimary,),
-                                  items: items.map((String items) {
+                                  icon: const Icon(
+                                    FluentIcons.chevron_down_24_regular,
+                                    color: AppColors.lightPrimary,
+                                  ),
+                                  items: users.map((user) {
+                                    return DropdownMenuItem<UserModel>(
+                                      value: user,
+                                      child: Text("${user.firstName!} ${user.lastName!}"),
+                                    );
+                                  }).toList(),
+                                  onChanged: (UserModel? user) {
+                                    setState(() {
+                                      selectedUser = user!;
+                                    });
+                                  },
+                                  /* items: items.map((String items) {
                                     return DropdownMenuItem(
                                       value: items,
                                       child: Text(items),
                                     );
                                   }).toList(),
-                                  onChanged: (String? newValue) {
+                                  onChanged: (String? item) {
                                     setState(() {
-                                      dropdownvalue = newValue!;
+                                      selectedItem = item!;
                                     });
-                                  },
+                                  },*/
                                 ),
                               ),
                             ],
@@ -117,51 +166,95 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 24,),
+              const SizedBox(height: 24),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Görevin Aciliyeti",style: AppText.labelSemiBold,),
-                  SizedBox(height: 12,),
-                  Row(children: [
-                    GestureDetector(
-                      onTap: (){setState((){
-                        index =1;
-                      });},
-                      child: Container(
-                        height: 30,
-                        width: 30,
-                        decoration: BoxDecoration(color: AppColors.lightError,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: index==1 ? Colors.black : Colors.transparent )),
+                  Text(
+                    "Görevin Aciliyeti",
+                    style: AppText.labelSemiBold,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            importance = 1;
+                          });
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          decoration: BoxDecoration(
+                            color: AppColors.lightError,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              width: 2,
+                              color: importance == 1
+                                  ? Colors.black
+                                  : Colors.transparent,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 24,),
-                    GestureDetector(
-                      onTap: (){setState((){
-                        index =2;});},
-                      child: Container(
-                        height: 30,
-                        width: 30,
-                        decoration: BoxDecoration(color: AppColors.lightWarning,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: index==2  ? Colors.black : Colors.transparent )),
+                      const SizedBox(width: 24),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            importance = 2;
+                          });
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          decoration: BoxDecoration(
+                            color: AppColors.lightWarning,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              width: 2,
+                              color: importance == 2
+                                  ? Colors.black
+                                  : Colors.transparent,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 24,),
-                    GestureDetector(
-                      onTap: (){setState((){
-                        index=3;});},
-                      child: Container(
-                        height: 30,
-                        width: 30,
-                        decoration: BoxDecoration(color: AppColors.lightSuccess,borderRadius: BorderRadius.circular(100),border: Border.all(width: 2,color: index==3  ? Colors.black : Colors.transparent )),
+                      const SizedBox(width: 24),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            importance = 3;
+                          });
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          decoration: BoxDecoration(
+                            color: AppColors.lightSuccess,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              width: 2,
+                              color: importance == 3
+                                  ? Colors.black
+                                  : Colors.transparent,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],)
+                    ],
+                  )
                 ],
               ),
-              SizedBox(height: 32,),
+              const SizedBox(height: 32),
               Align(
-                  alignment:Alignment.centerRight,
-                  child: ElevatedButton.icon(icon: Icon(FluentIcons.save_24_regular), onPressed:addTask, label: Text("Kaydet")))
-
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  icon: const Icon(FluentIcons.save_24_regular),
+                  onPressed: addTask,
+                  label: const Text("Kaydet"),
+                ),
+              ),
             ],
           ),
         ),

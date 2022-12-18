@@ -28,7 +28,7 @@ class UserModel {
         lastName: json["lastName"] as String,
         email: json["email"] as String,
         isAdmin: json["isAdmin"] as bool,
-        password: json["password"] as String,
+        password: json["password"] as String?,
         createdAt: json["createdAt"] as Timestamp,
         // updatedAt: json["updatedAt"] as DateTime,
       );

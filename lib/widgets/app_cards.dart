@@ -1,18 +1,17 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:on_duty/models/task.dart';
+import 'package:on_duty/views/edit_task.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
+import '../models/user.dart';
 
 class AppCards {
   static Widget taskCard({
-    required Color color,
-    required String title,
-    required String task,
-    required String date,
-    required String fullName,
+    required TaskModel task,
     required BuildContext context,
-    required List<PopupMenuEntry<int>> Function(BuildContext) itemBuilder
+    required List<PopupMenuEntry<int>> Function(BuildContext) itemBuilder,
   }) {
     return Container(
       padding: const EdgeInsets.only(left: 16, top: 4, bottom: 16),
@@ -28,17 +27,31 @@ class AppCards {
             children: [
               Row(
                 children: [
-                  CircleAvatar(backgroundColor: color, radius: 9),
+                  CircleAvatar(
+                      backgroundColor: setImportanceColor(task.importance!),
+                      radius: 9),
                   const SizedBox(width: 12),
-                  Text(title, style: AppText.contextSemiBold)
+                  Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width / 1.7),
+                    child: Text(
+                      task.title!,
+                      // overflow: TextOverflow.ellipsis,
+                      style: AppText.contextSemiBold,
+                    ),
+                  )
                 ],
               ),
               PopupMenuButton<int>(
                 padding: const EdgeInsets.all(8),
-                onSelected: (index){
-                  switch(index){
+                onSelected: (index) {
+                  switch (index) {
                     case 1:
-                      Navigator.of(context).pushNamed("edit_task_screen");
+                      /*Navigator.of(context).pushNamed("edit_task_screen", arguments: {
+                        'task': task,
+                      });*/
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => EditTaskScreen(task: task)));
                   }
                 },
                 itemBuilder: itemBuilder,
@@ -60,7 +73,7 @@ class AppCards {
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.only(right: 16),
-            child: Text(task, style: AppText.context),
+            child: Text(task.description!, style: AppText.context),
           ),
           const SizedBox(height: 20),
           Row(
@@ -80,7 +93,7 @@ class AppCards {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      date,
+                      task.dueDate.toString(),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -110,7 +123,7 @@ class AppCards {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        fullName,
+                        "${task.user?.firstName.toString()} ${task.user?.lastName.toString()}",
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 14,
@@ -129,8 +142,8 @@ class AppCards {
       ),
     );
   }
-  static Widget processCard({
 
+  static Widget processCard({
     required IconData icon,
     required String text,
     required void Function() onTap,
@@ -175,6 +188,17 @@ class AppCards {
         ),
       ),
     );
+  }
+}
+
+Color setImportanceColor(int level) {
+  switch (level) {
+    case 1:
+      return AppColors.lightError;
+    case 2:
+      return AppColors.lightWarning;
+    default:
+      return AppColors.lightSuccess;
   }
 }
 
