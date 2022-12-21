@@ -22,11 +22,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
 
-  final _tasksStream = FirebaseFirestore.instance.collection('tasks').withConverter<TaskModel>(
-    fromFirestore: TaskModel.fromFirestore,
-    toFirestore: (TaskModel task, options) => task.toFirestore(),
-  );
-  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
+  final _tasksStream =
+      FirebaseFirestore.instance.collection('tasks').withConverter<TaskModel>(
+            fromFirestore: TaskModel.fromFirestore,
+            toFirestore: (TaskModel task, options) => task.toFirestore(),
+          );
+  final CollectionReference _users =
+      FirebaseFirestore.instance.collection('users');
   final TextEditingController _searchController = TextEditingController();
 
   late bool isAdmin;
@@ -49,90 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
           automaticallyImplyLeading: false,
           title: const Text("Ana Sayfa"),
           actions: [
-            const Icon(Iconsax.notification),
-            const SizedBox(width: 12),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                const CircleAvatar(
-                  radius: 16,
-                  backgroundImage: AssetImage("assets/images/avatar.png"),
-                ),
-                PopupMenuButton<int>(
-                  onSelected: (value) {
-                    // if(value == 1) Navigator.pushNamed(context, "help_view");
-                    if (value == 4) logOut();
-                  },
-                  tooltip: "Profil Menüsü",
-                  padding: const EdgeInsets.all(8),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 1,
-                      child: Row(
-                        children: [
-                          const Icon(
-                            FluentIcons.person_24_regular,
-                            color: AppColors.lightPrimary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text("Profil", style: AppText.contextSemiBold),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 2,
-                      child: Row(
-                        children: [
-                          const Icon(
-                            FluentIcons.settings_24_regular,
-                            color: AppColors.lightPrimary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text("Ayarlar", style: AppText.contextSemiBold),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 3,
-                      child: Row(
-                        children: [
-                          const Icon(
-                            FluentIcons.chat_help_24_regular,
-                            color: AppColors.lightPrimary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text("Yardım", style: AppText.contextSemiBold),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 4,
-                      child: Row(
-                        children: [
-                          const Icon(
-                            FluentIcons.arrow_exit_20_regular,
-                            color: AppColors.lightPrimary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text("Çıkış Yap", style: AppText.contextSemiBold),
-                        ],
-                      ),
-                    ),
-                  ],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    side: const BorderSide(color: AppColors.lightPrimary),
-                  ),
-                  splashRadius: 20,
-                  icon: const Icon(
-                    Icons.add,
-                    color: Colors.transparent,
-                  ),
-                  offset: const Offset(0, 44),
-                  color: AppColors.lightSecondary,
-                  elevation: 0,
-                ),
-              ],
+            if (isAdmin)
+              IconButton(
+                splashRadius: 24,
+                onPressed: () =>
+                    Navigator.pushNamed(context, "notifications_screen"),
+                icon: const Icon(Iconsax.notification),
+              ),
+            IconButton(
+              splashRadius: 24,
+              onPressed: logOut,
+              icon: const Icon(FluentIcons.arrow_exit_20_regular),
             ),
             const SizedBox(width: 12),
           ],
@@ -164,90 +93,38 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.lightPrimary.withOpacity(.16),
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: TextFormField(
-                    controller: _searchController,
-                    onChanged: (String value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      suffixIcon: Icon(
-                        FluentIcons.search_24_filled,
-                        color: AppColors.lightPrimary,
-                      ),
-                      hintText: "Görev Ara...",
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.lightInfo),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(4),
-                          topLeft: Radius.circular(4),
-                          topRight: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.lightPrimary),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(4),
-                          topLeft: Radius.circular(4),
-                          topRight: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
-                        ),
-                      ),
-                    ),
+            TextFormField(
+              controller: _searchController,
+              onChanged: (String value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: const InputDecoration(
+                suffixIcon: Icon(
+                  FluentIcons.search_24_filled,
+                  color: AppColors.lightPrimary,
+                ),
+                hintText: "Görev Ara...",
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.lightInfo),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(4),
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
+                    bottomRight: Radius.circular(4),
                   ),
                 ),
-                /*PopupMenuButton<int>(
-                  tooltip: "Filtrele",
-                  padding: const EdgeInsets.all(8),
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 0,
-                      ),
-                      child: Text("Merhaba"),
-                    ),
-                  ],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    side: const BorderSide(color: AppColors.lightPrimary),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.lightPrimary),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(4),
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
+                    bottomRight: Radius.circular(4),
                   ),
-                  splashRadius: 20,
-                  offset: const Offset(9, 37),
-                  color: AppColors.lightSecondary,
-                  elevation: 0,
-                  child: OutlinedButton.icon(
-                    onPressed: null,
-                    icon: const Icon(
-                      FluentIcons.filter_24_regular,
-                      color: AppColors.lightPrimary,
-                    ),
-                    label: const Text(
-                      "Filtrele",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.4,
-                        color: AppColors.lightPrimary,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(4),
-                          topRight: Radius.circular(4),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),*/
-              ],
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -256,7 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             StreamBuilder<QuerySnapshot<TaskModel>>(
-                stream: _tasksStream.orderBy('importance', descending: false).orderBy('createdAt', descending: true).snapshots(),
+                stream: _tasksStream
+                    .where('user.uid',
+                        isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
+                    .orderBy('importance', descending: false)
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) {
                     return const Text('Something went wrong');
@@ -267,6 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 300,
                       child: const Center(child: CircularProgressIndicator()),
                     );
+                  } else if (snapshot.data?.size == 0) {
+                    return const Text("Görev bulunamadı.");
                   } else {
                     List tasks = snapshot.data!.docs.map((doc) {
                       TaskModel taskData = doc.data() as TaskModel;
@@ -276,13 +160,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     tasks = tasks
                         .where((s) => s.title
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase()))
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase()))
                         .toList();
+
+                    if (tasks.isEmpty) return const Text("Görev bulunamadı.");
 
                     return Column(
                       children: tasks.map((task) {
-
                         return Column(
                           children: [
                             AppCards.taskCard(
@@ -299,8 +184,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           color: AppColors.lightPrimary,
                                         ),
                                         const SizedBox(width: 10),
-                                        Text("Düzenle",
-                                            style: AppText.contextSemiBold),
+                                        Text(
+                                          "Düzenle",
+                                          style: AppText.contextSemiBold,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -314,7 +201,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           color: AppColors.lightPrimary,
                                         ),
                                         const SizedBox(width: 10),
-                                        Text("Sil", style: AppText.contextSemiBold),
+                                        Text(
+                                          "Sil",
+                                          style: AppText.contextSemiBold,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -324,12 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Row(
                                       children: [
                                         const Icon(
-                                          FluentIcons.check_24_regular,
+                                          FluentIcons.checkmark_24_regular,
                                           color: AppColors.lightPrimary,
                                         ),
                                         const SizedBox(width: 10),
-                                        Text("Tamamla",
-                                            style: AppText.contextSemiBold),
+                                        Text(
+                                          "Tamamla",
+                                          style: AppText.contextSemiBold,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -362,10 +254,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void setIsAdmin() async {
-    final docSnap = await _users.withConverter(
-      fromFirestore: UserModel.fromFirestore,
-      toFirestore: (UserModel user, options) => user.toFirestore(),
-    ).doc(_auth.currentUser!.uid).get();
+    final docSnap = await _users
+        .withConverter(
+          fromFirestore: UserModel.fromFirestore,
+          toFirestore: (UserModel user, options) => user.toFirestore(),
+        )
+        .doc(_auth.currentUser!.uid)
+        .get();
 
     final currentUser = docSnap.data();
 
@@ -375,18 +270,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<UserModel?> getUser(String id) async {
-    final docSnap = await _users.withConverter(
-      fromFirestore: UserModel.fromFirestore,
-      toFirestore: (UserModel user, options) => user.toFirestore(),
-    ).doc(id).get();
+    final docSnap = await _users
+        .withConverter(
+          fromFirestore: UserModel.fromFirestore,
+          toFirestore: (UserModel user, options) => user.toFirestore(),
+        )
+        .doc(id)
+        .get();
 
     return docSnap.data();
   }
 
   void logOut() {
     _auth.signOut().then((value) => {
-      Navigator.pushReplacementNamed(context, 'login_screen'),
-    });
+          Navigator.pushReplacementNamed(context, 'login_screen'),
+        });
   }
 
   @override

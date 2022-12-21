@@ -8,6 +8,7 @@ import 'package:on_duty/widgets/app_form.dart';
 import '../design/app_text.dart';
 import '../models/task.dart';
 import '../models/user.dart';
+import '../widgets/app_alerts.dart';
 
 class EditTaskScreen extends StatefulWidget {
   const EditTaskScreen({Key? key, this.task}) : super(key: key);
@@ -60,7 +61,10 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     _tasks.withConverter(
       fromFirestore: TaskModel.fromFirestore,
       toFirestore: (TaskModel task, options) => task.toFirestore(),
-    ).doc(widget.task?.uid).update(newTask.toJson()).then((value) => Navigator.pop(context));
+    ).doc(widget.task?.uid).update(newTask.toJson()).then((value) => {
+      Navigator.pop(context),
+      AppAlerts.toast(message: "Görev başarıyla güncellendi."),
+    });
   }
 
   @override

@@ -8,6 +8,7 @@ import 'package:on_duty/widgets/app_form.dart';
 
 import '../design/app_text.dart';
 import '../models/user.dart';
+import '../widgets/app_alerts.dart';
 
 class NewTaskScreen extends StatefulWidget {
   const NewTaskScreen({Key? key}) : super(key: key);
@@ -59,7 +60,10 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     _tasks.withConverter(
       fromFirestore: TaskModel.fromFirestore,
       toFirestore: (TaskModel task, options) => task.toFirestore(),
-    ).add(newTask).then((value) => Navigator.pop(context));
+    ).add(newTask).then((value) => {
+      Navigator.pop(context),
+      AppAlerts.toast(message: "Görev başarıyla oluşturuldu."),
+    });
   }
 
   @override

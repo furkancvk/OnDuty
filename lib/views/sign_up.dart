@@ -222,9 +222,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
-        ).then((value) => {
+        ).then((value) async => {
           addUser(),
-          _auth.currentUser!.updateDisplayName(_firstnameController.text),
+          await _auth.currentUser!.updateDisplayName(_firstnameController.text),
           setState(() => isLoading = false),
           Navigator.pushReplacementNamed(context, 'home_screen'),
           AppAlerts.toast(message: "Başarıyla giriş yapıldı."),
