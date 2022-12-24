@@ -25,7 +25,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   final CollectionReference _tasks = FirebaseFirestore.instance.collection('tasks');
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  late TextEditingController _dueDateController;
+  // late TextEditingController _dueDateController;
 
   List<UserModel> users = [];
   UserModel selectedUser = UserModel();
@@ -51,11 +51,15 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
 
   void editTask() {
     TaskModel newTask = TaskModel(
+      uid: widget.task?.uid,
       title: _titleController.text,
       description: _descriptionController.text,
       importance: importance,
       user: selectedUser,
-      dueDate: _dueDateController.text,
+      isCompleted: widget.task?.isCompleted,
+      // dueDate: _dueDateController.text,
+      dueDate: widget.task?.dueDate,
+      createdAt: widget.task?.createdAt,
     );
 
     _tasks.withConverter(
@@ -73,7 +77,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     getUsers();
     _titleController = TextEditingController(text: widget.task?.title);
     _descriptionController = TextEditingController(text: widget.task?.description);
-    _dueDateController = TextEditingController(text: widget.task?.dueDate);
+    // _dueDateController = TextEditingController(text: widget.task?.dueDate);
     importance = widget.task?.importance!;
   }
 
@@ -110,7 +114,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       label: "Son Tarih",
                       hint: "Tarihi giriniz",
                       icon: const Icon(Icons.date_range),
-                      controller: _dueDateController,
+                      controller: TextEditingController(),
                     ),
                   ),
                   const SizedBox(width: 20),
@@ -120,19 +124,20 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("Görevli Personel", style: AppText.labelSemiBold),
+                        const SizedBox(height: 4),
                         Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: AppColors.lightPrimary),
                           ),
                           child: Row(
                             children: [
-                              const Expanded(
-                                child: Icon(
-                                  FluentIcons.person_24_regular,
-                                  color: AppColors.lightPrimary,
-                                ),
+                              const Icon(
+                                FluentIcons.person_24_regular,
+                                color: AppColors.lightPrimary,
                               ),
+                              const SizedBox(width: 4),
                               Expanded(
                                 flex: 3,
                                 child: DropdownButton(

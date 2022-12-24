@@ -53,7 +53,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       description: _descriptionController.text,
       importance: importance,
       user: selectedUser,
-      dueDate: _dueDateController.text,
+      isCompleted: false,
+      // dueDate: _dueDateController.text,
+      dueDate: Timestamp.now(),
       createdAt: Timestamp.now(),
     );
 
@@ -115,19 +117,20 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("Görevli Personel", style: AppText.labelSemiBold),
+                        const SizedBox(height: 4),
                         Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: AppColors.lightPrimary),
                           ),
                           child: Row(
                             children: [
-                              const Expanded(
-                                child: Icon(
-                                  FluentIcons.person_24_regular,
-                                  color: AppColors.lightPrimary,
-                                ),
+                              const Icon(
+                                FluentIcons.person_24_regular,
+                                color: AppColors.lightPrimary,
                               ),
+                              const SizedBox(width: 4),
                               Expanded(
                                 flex: 3,
                                 child: DropdownButton(
@@ -149,17 +152,6 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                                       selectedUser = user!;
                                     });
                                   },
-                                  /* items: items.map((String items) {
-                                    return DropdownMenuItem(
-                                      value: items,
-                                      child: Text(items),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? item) {
-                                    setState(() {
-                                      selectedItem = item!;
-                                    });
-                                  },*/
                                 ),
                               ),
                             ],

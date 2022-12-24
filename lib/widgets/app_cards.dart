@@ -1,13 +1,118 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:on_duty/models/task.dart';
 import 'package:on_duty/views/edit_task.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
-import '../models/user.dart';
+import 'app_alerts.dart';
 
 class AppCards {
+  static final CollectionReference _tasks =
+      FirebaseFirestore.instance.collection('tasks');
+
+  static void completeTask(TaskModel task, context) {
+    TaskModel newTask = TaskModel(
+      uid: task.uid,
+      title: task.title,
+      description: task.description,
+      importance: task.importance,
+      user: task.user,
+      isCompleted: true,
+      dueDate: task.dueDate,
+      createdAt: task.createdAt,
+    );
+
+    _tasks
+        .withConverter(
+          fromFirestore: TaskModel.fromFirestore,
+          toFirestore: (TaskModel task, options) => task.toFirestore(),
+        )
+        .doc(task.uid)
+        .update(newTask.toJson())
+        .then((value) => {
+              Navigator.pop(context),
+              AppAlerts.toast(message: "Yuppi! Görevi tamamladın."),
+            });
+  }
+
+  static void deleteTask(id, context) async {
+    _tasks.doc(id).delete().then((value) => {
+          Navigator.pop(context),
+          AppAlerts.toast(message: "Görev başarıyla silindi."),
+        });
+  }
+
+  static void showMessageDeleteTask(id, context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Görev Sil",
+            textAlign: TextAlign.center,
+            style: AppText.titleSemiBold,
+          ),
+          content: const Text(
+            "Seçtiğiniz görevi silmek üzereseniz, emin misiniz?\nBu işlem geri alınamaz.",
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actionsPadding: const EdgeInsets.only(bottom: 24),
+          actions: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.lightError),
+              ),
+              child: const Text(
+                "Evet, sil",
+                style: TextStyle(color: AppColors.lightError),
+              ),
+              onPressed: () => deleteTask(id, context),
+            ),
+            ElevatedButton(
+              child: const Text("Hayır, silme"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  static void showMessageCompleteTask(task, context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Görev Tamamla",
+            textAlign: TextAlign.center,
+            style: AppText.titleSemiBold,
+          ),
+          content: const Text(
+            "Seçtiğiniz görevin tamamlandığından, emin misiniz? Admin bu işlemden haberdar olacaktır.",
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: const EdgeInsets.only(bottom: 24),
+          actions: [
+            ElevatedButton(
+              child: const Text("Evet, tamamla"),
+              onPressed: () => completeTask(task, context),
+            ),
+            OutlinedButton(
+              child: const Text("Hayır, kapat"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static Widget taskCard({
     required TaskModel task,
     required BuildContext context,
@@ -28,12 +133,14 @@ class AppCards {
               Row(
                 children: [
                   CircleAvatar(
-                      backgroundColor: setImportanceColor(task.importance!),
-                      radius: 9),
+                    backgroundColor: setImportanceColor(task.importance!),
+                    radius: 9,
+                  ),
                   const SizedBox(width: 12),
                   Container(
                     constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width / 1.7),
+                      maxWidth: MediaQuery.of(context).size.width / 1.7,
+                    ),
                     child: Text(
                       task.title!,
                       // overflow: TextOverflow.ellipsis,
@@ -47,11 +154,17 @@ class AppCards {
                 onSelected: (index) {
                   switch (index) {
                     case 1:
-                      /*Navigator.of(context).pushNamed("edit_task_screen", arguments: {
-                        'task': task,
-                      });*/
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => EditTaskScreen(task: task)));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => EditTaskScreen(task: task),
+                        ),
+                      );
+                      break;
+                    case 2:
+                      showMessageDeleteTask(task.uid, context);
+                      break;
+                    case 3:
+                      showMessageCompleteTask(task, context);
                   }
                 },
                 itemBuilder: itemBuilder,
@@ -93,7 +206,8 @@ class AppCards {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      task.dueDate.toString(),
+                      // task.dueDate.toString(),
+                      DateFormat.yMd("tr").format(task.dueDate!.toDate()),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,

@@ -7,7 +7,8 @@ class TaskModel {
   String? description;
   int? importance;
   UserModel? user;
-  String? dueDate;
+  bool? isCompleted;
+  Timestamp? dueDate;
   Timestamp? createdAt;
 
   // DateTime? updatedAt;
@@ -18,6 +19,7 @@ class TaskModel {
     this.description,
     this.importance,
     this.user,
+    this.isCompleted,
     this.dueDate,
     this.createdAt,
     // this.updatedAt,
@@ -29,7 +31,8 @@ class TaskModel {
         description: json["description"] as String,
         importance: json["importance"] as int,
         user: UserModel.fromJson(json["user"]),
-        dueDate: json["dueDate"] as String,
+        isCompleted: json["isCompleted"] as bool,
+        dueDate: json["dueDate"] as Timestamp,
         createdAt: json["createdAt"] as Timestamp,
         // updatedAt: json["updatedAt"] as DateTime,
       );
@@ -40,6 +43,7 @@ class TaskModel {
         "description": description,
         "importance": importance,
         "user": user?.toJson(),
+        "isCompleted": isCompleted,
         "dueDate": dueDate,
         "createdAt": createdAt,
         // "updatedAt": updatedAt,
@@ -56,6 +60,7 @@ class TaskModel {
       description: data?['description'],
       importance: data?['importance'],
       user: UserModel.fromJson(data?["user"]),
+      isCompleted: data?['isCompleted'],
       dueDate: data?['dueDate'],
       createdAt: data?['createdAt'],
     );
@@ -68,6 +73,7 @@ class TaskModel {
       if (description != null) "description": description,
       if (importance != null) "importance": importance,
       if (user != null) "user": user?.toFirestore(),
+      if (isCompleted != null) "isCompleted": isCompleted,
       if (dueDate != null) "dueDate": dueDate,
       if (createdAt != null) "createdAt": createdAt,
     };

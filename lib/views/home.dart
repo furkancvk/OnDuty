@@ -134,8 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             StreamBuilder<QuerySnapshot<TaskModel>>(
                 stream: _tasksStream
-                    .where('user.uid',
-                        isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
+                    .where('user.uid', isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
+                    .where('isCompleted', isEqualTo: false)
                     .orderBy('importance', descending: false)
                     .orderBy('createdAt', descending: true)
                     .snapshots(),
