@@ -6,6 +6,7 @@ import 'package:page_transition/page_transition.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
+import '../storage/storage.dart';
 import '../widgets/app_alerts.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final SecureStorage secureStorage = SecureStorage();
   final _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -32,6 +34,21 @@ class _LoginScreenState extends State<LoginScreen> {
         type: PageTransitionType.rightToLeft,
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    secureStorage.readSecureData('rememberMeEmail').then((value) => {
+      _emailController.text = value ?? '',
+      if(value != null) isChecked = true,
+      if(mounted) setState(() {}),
+    });
+    secureStorage.readSecureData('rememberMePassword').then((value) => {
+      _passwordController.text = value ?? '',
+      if(value != null) isChecked = true,
+      if(mounted) setState(() {}),
+    });
   }
 
   @override
@@ -130,6 +147,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void logIn() async {
+    if(isChecked) {
+      await secureStorage.writeSecureData('rememberMeEmail', _emailController.text);
+      await secureStorage.writeSecureData('rememberMePassword', _passwordController.text);
+    } else {
+      await secureStorage.deleteSecureData('rememberMeEmail');
+      await secureStorage.deleteSecureData('rememberMePassword');
+    }
+
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
       _auth.signInWithEmailAndPassword(
