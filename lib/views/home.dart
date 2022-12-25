@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   } else if (snapshot.data?.size == 0) {
-                    return const Text("Görev bulunamadı.");
+                    return Image.asset("assets/images/not_found.png");
                   } else {
                     List tasks = snapshot.data!.docs.map((doc) {
                       TaskModel taskData = doc.data() as TaskModel;
@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             .contains(_searchQuery.toLowerCase()))
                         .toList();
 
-                    if (tasks.isEmpty) return const Text("Görev bulunamadı.");
+                    if (tasks.isEmpty) return  Image.asset("assets/images/list_empty.png");
 
                     return Column(
                       children: tasks.map((task) {
