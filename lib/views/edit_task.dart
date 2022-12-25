@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:on_duty/design/app_colors.dart';
 import 'package:on_duty/widgets/app_form.dart';
 
@@ -58,7 +59,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       user: selectedUser,
       isCompleted: widget.task?.isCompleted,
       // dueDate: _dueDateController.text,
-      dueDate: widget.task?.dueDate,
+      dueDate: Timestamp.fromDate(_dateTime!),
       createdAt: widget.task?.createdAt,
     );
 
@@ -70,7 +71,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       AppAlerts.toast(message: "Görev başarıyla güncellendi."),
     });
   }
-
+  DateTime? _dateTime;
   @override
   void initState() {
     super.initState();
@@ -79,6 +80,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     _descriptionController = TextEditingController(text: widget.task?.description);
     // _dueDateController = TextEditingController(text: widget.task?.dueDate);
     importance = widget.task?.importance!;
+    _dateTime = widget.task?.dueDate?.toDate();
   }
 
   @override
@@ -109,13 +111,49 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                    flex: 1,
-                    child: AppForm.appTextFormFieldIcon(
-                      label: "Son Tarih",
-                      hint: "Tarihi giriniz",
-                      icon: const Icon(Icons.date_range),
-                      controller: TextEditingController(),
-                    ),
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Son Tarih', style: AppText.labelSemiBold),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: () => showDatePicker(
+                              context: context,
+                              initialDate: _dateTime!,
+                              firstDate:
+                              DateTime.now().subtract(Duration(days: 0)),
+                              lastDate: DateTime(2999),
+                            ).then((date) => setState(() {
+                              _dateTime = date!;
+                            })),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                      color: AppColors.lightPrimary)),
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+
+                                         DateFormat.yMd("tr")
+                                        .format(_dateTime!),
+                                    style: AppText.context,
+                                  ),
+                                  Icon(
+                                    FluentIcons.calendar_ltr_24_regular,
+                                    color: AppColors.lightPrimary,
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      )
                   ),
                   const SizedBox(width: 20),
                   Expanded(

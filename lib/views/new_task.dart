@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:on_duty/design/app_colors.dart';
 import 'package:on_duty/models/task.dart';
 import 'package:on_duty/widgets/app_form.dart';
@@ -19,8 +20,10 @@ class NewTaskScreen extends StatefulWidget {
 
 class _NewTaskScreenState extends State<NewTaskScreen> {
   final _auth = FirebaseAuth.instance;
-  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
-  final CollectionReference _tasks = FirebaseFirestore.instance.collection('tasks');
+  final CollectionReference _users =
+      FirebaseFirestore.instance.collection('users');
+  final CollectionReference _tasks =
+      FirebaseFirestore.instance.collection('tasks');
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dueDateController = TextEditingController();
@@ -29,12 +32,15 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   UserModel selectedUser = UserModel();
 
   void getUsers() async {
-    final docSnap = await _users.withConverter(
-      fromFirestore: UserModel.fromFirestore,
-      toFirestore: (UserModel user, options) => user.toFirestore(),
-    ).get();
+    final docSnap = await _users
+        .withConverter(
+          fromFirestore: UserModel.fromFirestore,
+          toFirestore: (UserModel user, options) => user.toFirestore(),
+        )
+        .get();
 
-    final data = docSnap.docs.where((doc) => doc.id != _auth.currentUser?.uid).toList();
+    final data =
+        docSnap.docs.where((doc) => doc.id != _auth.currentUser?.uid).toList();
     setState(() {
       users = data.map((doc) {
         UserModel userData = doc.data();
@@ -46,7 +52,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   }
 
   int importance = 1;
-  
+
   void addTask() {
     TaskModel newTask = TaskModel(
       title: _titleController.text,
@@ -55,25 +61,32 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       user: selectedUser,
       isCompleted: false,
       // dueDate: _dueDateController.text,
-      dueDate: Timestamp.now(),
+      dueDate: Timestamp.fromDate(_dateTime!),
       createdAt: Timestamp.now(),
     );
 
-    _tasks.withConverter(
-      fromFirestore: TaskModel.fromFirestore,
-      toFirestore: (TaskModel task, options) => task.toFirestore(),
-    ).add(newTask).then((value) => {
-      Navigator.pop(context),
-      AppAlerts.toast(message: "Görev başarıyla oluşturuldu."),
-    });
+    _tasks
+        .withConverter(
+          fromFirestore: TaskModel.fromFirestore,
+          toFirestore: (TaskModel task, options) => task.toFirestore(),
+        )
+        .add(newTask)
+        .then((value) => {
+              Navigator.pop(context),
+              AppAlerts.toast(message: "Görev başarıyla oluşturuldu."),
+            });
   }
 
   @override
   void initState() {
     super.initState();
     getUsers();
+    _dateTime=now;
   }
 
+
+  DateTime now = DateTime.now();
+  DateTime? _dateTime;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -100,16 +113,54 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                    flex: 1,
-                    child: AppForm.appTextFormFieldIcon(
-                      label: "Son Tarih",
-                      hint: "Tarihi giriniz",
-                      icon: const Icon(
-                        FluentIcons.calendar_assistant_24_regular,
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Son Tarih', style: AppText.labelSemiBold),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: () {
+
+                              showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate:
+                              DateTime.now().subtract(Duration(days: 0)),
+                              lastDate: DateTime(2999),
+                            ).then((date) => setState(() {
+                              _dateTime = date!;
+                            }));}
+                            ,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                      color: AppColors.lightPrimary)),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _dateTime == null
+                                        ? DateFormat.yMd("tr").format(now)
+                                        : DateFormat.yMd("tr")
+                                            .format(_dateTime!),
+                                    style: AppText.context,
+                                  ),
+                                  Icon(
+                                    FluentIcons.calendar_ltr_24_regular,
+                                    color: AppColors.lightPrimary,
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      )
                       ),
-                      controller: _dueDateController,
-                    ),
-                  ),
                   const SizedBox(width: 20),
                   Expanded(
                     flex: 1,
@@ -144,7 +195,8 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                                   items: users.map((user) {
                                     return DropdownMenuItem<UserModel>(
                                       value: user,
-                                      child: Text("${user.firstName!} ${user.lastName!}"),
+                                      child: Text(
+                                          "${user.firstName!} ${user.lastName!}"),
                                     );
                                   }).toList(),
                                   onChanged: (UserModel? user) {
