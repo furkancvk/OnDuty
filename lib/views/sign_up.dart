@@ -19,7 +19,8 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _auth = FirebaseAuth.instance;
-  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
+  final CollectionReference _users =
+      FirebaseFirestore.instance.collection('users');
 
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
@@ -29,6 +30,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isChecked = false;
   bool isLoading = false;
+  static final RegExp nameRegExp = RegExp('[a-zA-Z]');
 
   @override
   Widget build(BuildContext context) {
@@ -57,18 +59,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: AppForm.appTextFormField(
+                        child: AppForm.appTextFormFieldRegex(
                           label: "İsim",
                           hint: "Ahmet",
                           controller: _firstnameController,
+                          formatter: nameRegExp,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: AppForm.appTextFormField(
+                        child: AppForm.appTextFormFieldRegex(
                           label: "Soyisim",
                           hint: "Temiz",
                           controller: _lastnameController,
+                          formatter: nameRegExp,
                         ),
                       ),
                     ],
@@ -209,45 +213,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
       createdAt: Timestamp.now(),
     );
 
-    _users.withConverter(
-      fromFirestore: UserModel.fromFirestore,
-      toFirestore: (UserModel newUser, options) => newUser.toFirestore(),
-    ).doc(_auth.currentUser!.uid).set(newUser);
+    _users
+        .withConverter(
+          fromFirestore: UserModel.fromFirestore,
+          toFirestore: (UserModel newUser, options) => newUser.toFirestore(),
+        )
+        .doc(_auth.currentUser!.uid)
+        .set(newUser);
   }
 
   void signUp() async {
     if (_formKey.currentState!.validate()) {
       if (isChecked) {
         setState(() => isLoading = true);
-        _auth.createUserWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        ).then((value) async => {
-          addUser(),
-          await _auth.currentUser!.updateDisplayName(_firstnameController.text),
-          setState(() => isLoading = false),
-          Navigator.pushReplacementNamed(context, 'home_screen'),
-          AppAlerts.toast(message: "Başarıyla giriş yapıldı."),
-        }).catchError((e) => {
-          setState(() => isLoading = false),
-          if (e.code == 'email-already-in-use') {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                padding: EdgeInsets.all(20),
-                content: Text("Bu email zaten kullanılmaktadır."),
-                duration: Duration(milliseconds: 1500),
-              ),
-            ),
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                padding: const EdgeInsets.all(20),
-                content: Text(e.toString()),
-                duration: const Duration(milliseconds: 1500),
-              ),
-            ),
-          },
-        });
+        _auth
+            .createUserWithEmailAndPassword(
+              email: _emailController.text,
+              password: _passwordController.text,
+            )
+            .then((value) async => {
+                  addUser(),
+                  await _auth.currentUser!
+                      .updateDisplayName(_firstnameController.text),
+                  setState(() => isLoading = false),
+                  Navigator.pushReplacementNamed(context, 'home_screen'),
+                  AppAlerts.toast(message: "Başarıyla giriş yapıldı."),
+                })
+            .catchError((e) => {
+                  setState(() => isLoading = false),
+                  if (e.code == 'email-already-in-use')
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          padding: EdgeInsets.all(20),
+                          content: Text("Bu email zaten kullanılmaktadır."),
+                          duration: Duration(milliseconds: 1500),
+                        ),
+                      ),
+                    }
+                  else
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          padding: const EdgeInsets.all(20),
+                          content: Text(e.toString()),
+                          duration: const Duration(milliseconds: 1500),
+                        ),
+                      ),
+                    },
+                });
       } else {
         setState(() => isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(

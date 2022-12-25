@@ -160,7 +160,7 @@ class AppForm {
   }
 
   static Widget appTextFormFieldRegex({
-    required TextInputFormatter formatter,
+    required RegExp formatter,
     required String label,
     required String hint,
     required TextEditingController controller,
@@ -206,7 +206,7 @@ class AppForm {
           controller: controller,
           keyboardType:
               isEmail ? TextInputType.emailAddress : TextInputType.text,
-          inputFormatters: [formatter],
+          inputFormatters: [FilteringTextInputFormatter.allow(formatter)],
           obscureText: isPassword,
           decoration: InputDecoration(
             hintText: hint,
