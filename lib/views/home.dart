@@ -134,7 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             StreamBuilder<QuerySnapshot<TaskModel>>(
                 stream: _tasksStream
-                    .where('user.uid', isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
+                    .where('user.uid',
+                        isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
                     .where('isCompleted', isEqualTo: false)
                     .orderBy('importance', descending: false)
                     .orderBy('createdAt', descending: true)
@@ -164,7 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             .contains(_searchQuery.toLowerCase()))
                         .toList();
 
-                    if (tasks.isEmpty) return  Image.asset("assets/images/list_empty.png");
+                    if (tasks.isEmpty)
+                      return Image.asset("assets/images/list_empty.png");
 
                     return Column(
                       children: tasks.map((task) {
@@ -239,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: isAdmin
             ? FloatingActionButton(
                 onPressed: () =>
-                    Navigator.of(context).pushNamed("new_task_screen"),
+                    Navigator.pushNamed(context, "new_task_screen"),
                 child: const Icon(Icons.add),
               )
             : null,

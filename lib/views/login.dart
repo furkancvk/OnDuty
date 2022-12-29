@@ -123,7 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: AppText.context,
                       ),
                       GestureDetector(
-                        onTap: () => onTapClickMe(context),
+                        // onTap: () => onTapClickMe(context),
+                        onTap: () => Navigator.pushNamed(context, "sign_up_screen"),
                         child: const Text(
                           "tıklayın",
                           style: TextStyle(

@@ -34,7 +34,10 @@ class _MyAppState extends State<MyApp> {
       themeMode: ThemeMode.light,
       darkTheme: AppThemeData.darkTheme(context),
       initialRoute: _auth.currentUser != null ? "home_screen" : "login_screen",
-      routes: routes,
+      // routes: routes,
+      onGenerateRoute: (settings) {
+        return routeTo(settings.name!);
+      },
     );
   }
 }
