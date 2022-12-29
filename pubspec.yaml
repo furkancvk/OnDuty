@@ -20,14 +20,18 @@ dependencies:
   firebase_auth: ^4.2.0
   cloud_firestore: ^4.2.0
   flutter_secure_storage: ^7.0.1
-
-
-
+  flutter_launcher_icons: ^0.11.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+flutter_icons:
+  adaptive_icon_background: "#ffffff"
+  android : true
+  ios : true
+  image_path: "assets/images/logo.png"
 
 flutter:
   uses-material-design: true
