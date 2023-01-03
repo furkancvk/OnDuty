@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:on_duty/services/notification_service.dart';
 
 import 'design/app_theme_data.dart';
 import 'firebase_options.dart';
@@ -12,6 +14,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseMessaging.onBackgroundMessage(NotificationService.backgroundNotification);
   initializeDateFormatting('tr_TR', null).then((_) => runApp(const MyApp()));
 }
 
@@ -24,6 +27,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _auth = FirebaseAuth.instance;
+  final NotificationService _notificationService = NotificationService();
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationService.connect();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +44,7 @@ class _MyAppState extends State<MyApp> {
       themeMode: ThemeMode.light,
       darkTheme: AppThemeData.darkTheme(context),
       initialRoute: _auth.currentUser != null ? "home_screen" : "login_screen",
-      // routes: routes,
-      onGenerateRoute: (settings) {
-        return routeTo(settings.name!);
-      },
+      onGenerateRoute: (settings) => routeTo(settings.name!),
     );
   }
 }

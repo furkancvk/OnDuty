@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,13 +8,17 @@ import 'package:on_duty/views/edit_task.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
+import '../services/notification_service.dart';
 import 'app_alerts.dart';
 
 class AppCards {
+  final _auth = FirebaseAuth.instance;
   static final CollectionReference _tasks =
       FirebaseFirestore.instance.collection('tasks');
 
-  static void completeTask(TaskModel task, context) {
+  void completeTask(TaskModel task, context) {
+    NotificationService notificationService = NotificationService();
+
     TaskModel newTask = TaskModel(
       uid: task.uid,
       title: task.title,
@@ -35,6 +40,7 @@ class AppCards {
         .then((value) => {
               Navigator.pop(context),
               AppAlerts.toast(message: "Yuppi! Görevi tamamladın."),
+              notificationService.create(_auth.currentUser?.uid, "Görev tamamlandı", task.description),
             });
   }
 
@@ -101,7 +107,7 @@ class AppCards {
           actions: [
             ElevatedButton(
               child: const Text("Evet, tamamla"),
-              onPressed: () => completeTask(task, context),
+              onPressed: () => AppCards().completeTask(task, context),
             ),
             OutlinedButton(
               child: const Text("Hayır, kapat"),
