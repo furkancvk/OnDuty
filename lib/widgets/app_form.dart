@@ -314,8 +314,12 @@ class AppForm {
 }
 
 class PasswordFieldWithVisibility extends StatefulWidget {
-  const PasswordFieldWithVisibility({Key? key, required this.controller, Widget? this.content,required bool this.showForgotPassword})
-      : super(key: key);
+  const PasswordFieldWithVisibility({
+    Key? key,
+    required this.controller,
+    this.content,
+    required this.showForgotPassword,
+  }) : super(key: key);
   final TextEditingController controller;
   final Widget? content;
   final bool showForgotPassword;
@@ -373,7 +377,7 @@ class _PasswordFieldWithVisibilityState
           right: -10,
           top: -15,
           child: TextButton(
-              child: Text("Şifremi Unuttum"),
+              child: Text("Şifremi Unuttum", style: AppText.label),
               onPressed: () => {
                     showDialog(
                         context: context,

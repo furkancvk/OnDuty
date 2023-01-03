@@ -322,116 +322,74 @@ Color setImportanceColor(int level) {
   }
 }
 
-/*class ImagePickerWidget extends StatefulWidget {
-  const ImagePickerWidget({Key? key, required this.label, required this.getSelectedImage}) : super(key: key);
-  final String label;
-  final Function(File?) getSelectedImage;
+class NotificationCard extends StatefulWidget {
+  const NotificationCard({Key? key, required this.notification}) : super(key: key);
+  final Map<String, dynamic> notification;
 
   @override
-  State<ImagePickerWidget> createState() => _ImagePickerWidgetState();
+  State<NotificationCard> createState() => _NotificationCardState();
 }
 
-class _ImagePickerWidgetState extends State<ImagePickerWidget> {
-  File? image;
+class _NotificationCardState extends State<NotificationCard> {
+  final _notifications = FirebaseFirestore.instance.collection('notifications');
+  bool _isExpanded = false;
 
-  Future pickImage(ImageSource source) async {
-    try {
-      final image = await ImagePicker().pickImage(source: source);
-      if (image == null) return;
-
-      final imageTemporary = File(image.path);
-      setState(() => this.image = imageTemporary);
-
-      widget.getSelectedImage(imageTemporary);
-
-    } on PlatformException catch (e) {
-      print('Resim yükleme başarısız oldu: $e');
-    }
+  void makeRead() async {
+    Future.delayed(const Duration(seconds: 3), () => {
+      _notifications.doc(widget.notification["uid"]).update({"isRead": true}),
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        showModalBottomSheet(
-            context: context,
-            builder: (context) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(
-                    FluentIcons.content_view_gallery_24_regular,
-                    color: AppColors.lightPrimary,
-                  ),
-                  title: Text('Galeriden fotoğraf seç',
-                      style: AppText.context),
-                  onTap: () {
-                    pickImage(ImageSource.gallery);
-                  },
-                  tileColor: AppColors.lightSecondary,
+    return Container(
+      margin: const EdgeInsets.only(left: 24, right: 24, top: 24),
+      child: ExpansionPanelList(
+        elevation: 1,
+        animationDuration: const Duration(milliseconds: 500),
+        expandedHeaderPadding: const EdgeInsets.all(0),
+        expansionCallback: (panelIndex, isExpanded) {
+          setState(() {
+            _isExpanded = !isExpanded;
+          });
+          if(_isExpanded) {
+            makeRead();
+          }
+        },
+        children: <ExpansionPanel>[
+          ExpansionPanel(
+            backgroundColor: widget.notification["isRead"] ? AppColors.lightSecondary : AppColors.lightGrey,
+              headerBuilder: (context, isExpanded) {
+                return ListTile(
+                  leading: const Icon(Icons.task_alt_outlined),
+                  title: Text(widget.notification["title"]),
+                  subtitle: Text("${widget.notification["senderUser"]["firstName"]} ${widget.notification["senderUser"]["lastName"]}"),
+                );
+              },
+              body: Container(
+                // color: Colors.red,
+                width: double.infinity,
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.notification["description"],
+                      style: TextStyle(color: ThemeData.light().textTheme.bodySmall?.color),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      "${DateFormat.yMd("tr").format(widget.notification["createdAt"].toDate())} tarihinde görev tamamlanmıştır",
+                      style: TextStyle(color: ThemeData.light().textTheme.bodySmall?.color?.withOpacity(0.3)),
+                    )
+                  ],
                 ),
-                ListTile(
-                  leading: const Icon(
-                    FluentIcons.camera_24_regular,
-                    color: AppColors.lightPrimary,
-                  ),
-                  title: Text('Kamera ile fotoğraf çek',
-                      style: AppText.context),
-                  onTap: () {
-                    pickImage(ImageSource.camera);
-                  },
-                  tileColor: AppColors.lightSecondary,
-                ),
-              ],
-            ));
-      },
-      child: image != null
-          ? Container(
-        width: 171,
-        height: 156,
-        decoration: BoxDecoration(
-          color: AppColors.lightPrimary.withOpacity(0.04),
-          border: Border.all(
-            color: AppColors.lightPrimary,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Image.file(image!, fit: BoxFit.cover),
-      )
-          : DottedBorder(
-        color: AppColors.lightPrimary,
-        strokeWidth: 1,
-        dashPattern: const [8, 4],
-        radius: const Radius.circular(4),
-        child: Container(
-          height: 153,
-          decoration: BoxDecoration(
-            color: AppColors.lightPrimary.withOpacity(0.04),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              const Icon(
-                FluentIcons.image_24_regular,
-                size: 53,
-                color: AppColors.lightPrimary,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    FluentIcons.add_24_regular,
-                    size: 28,
-                    color: AppColors.lightPrimary,
-                  ),
-                  Text(widget.label, style: AppText.contextSemiBold),
-                ],
-              ),
-            ],
+              isExpanded: _isExpanded,
+              canTapOnHeader: true,
           ),
-        ),
+        ],
       ),
     );
   }
-}*/
+}

@@ -47,7 +47,7 @@ class NotificationModel {
     final data = snapshot.data();
     return NotificationModel(
       uid: data?['uid'],
-      senderUser: data?['senderUser'],
+      senderUser: UserModel.fromFirestore(snapshot, options),
       // receiverUser: data?['receiverUser'],
       title: data?['title'],
       description: data?['description'],

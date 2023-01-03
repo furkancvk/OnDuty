@@ -18,8 +18,10 @@ class ResetPasswordModal extends StatefulWidget {
 
 class _ResetPasswordModalState extends State<ResetPasswordModal> {
   final _auth = FirebaseAuth.instance;
-  TextEditingController _emailController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -28,42 +30,77 @@ class _ResetPasswordModalState extends State<ResetPasswordModal> {
         style: AppText.titleSemiBold,
       ),
       content: SizedBox(
-          height: 200,
+        height: 180,
+        child: Form(
+          key: _formKey,
           child: Column(
             children: [
               Text(
-                "Şifre değiştirmek için lütfen e-mailinizi girin size bir mail yollayacağız",
+                "Şifre değiştirmek için lütfen\ne-mailinizi girin size bir mail yollayacağız",
                 style: AppText.label,
               ),
-              SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               AppForm.appTextFormField(
-                  label: "E-mail",
-                  hint: "isminiz@domain.com",
-                  controller: _emailController),
+                label: "E-mail",
+                hint: "isminiz@domain.com",
+                controller: _emailController,
+                isEmail: true,
+              ),
             ],
-          )),
+          ),
+        ),
+      ),
+      actionsPadding: const EdgeInsets.only(right: 24, bottom: 24),
       actions: [
         OutlinedButton(
-            onPressed: () {
-              passwordReset();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  padding: EdgeInsets.all(0),
-                  backgroundColor: AppColors.lightSecondary,
-                  content: AppAlerts.info(
-                      "Size bir bağlantı gönderdik. Mail kutunuzu kontrol ediniz")));
-            },
-            child: Text(
-              "Gönder",
-              style: AppText.labelSemiBold,
-            ))
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              setState(() {
+                isLoading = true;
+              });
+              Future.delayed(const Duration(seconds: 2), () => {
+                setState(() {
+                  isLoading = false;
+                }),
+                passwordReset(),
+                Navigator.pop(context),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    padding: const EdgeInsets.all(0),
+                    duration: const Duration(milliseconds: 1500),
+                    backgroundColor: AppColors.lightSecondary,
+                    content: AppAlerts.info("Size bir bağlantı gönderdik. Mail kutunuzu kontrol ediniz"),
+                  ),
+                ),
+              });
+            }
+          },
+          child: isLoading
+              ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: AppColors.lightPrimary,
+                  strokeWidth: 3,
+                ),
+              )
+              : const Text("Gönder"),
+          /*child: Text(
+            "Gönder",
+            style: AppText.labelSemiBold,
+          ),*/
+        )
       ],
     );
   }
 
   Future passwordReset() async {
     await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 }
