@@ -23,11 +23,18 @@ dependencies:
   flutter_launcher_icons: ^0.11.0
   firebase_messaging: ^14.2.1
   internet_connection_checker: ^1.0.0+1
+  flutter_native_splash: ^2.2.16
+
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+flutter_native_splash:
+  image: assets/images/splash.png
+  color: "#ffffff"
 
 flutter_icons:
   adaptive_icon_background: "#ffffff"
