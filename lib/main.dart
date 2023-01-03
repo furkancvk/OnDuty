@@ -1,7 +1,9 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:on_duty/services/notification_service.dart';
 
@@ -9,8 +11,15 @@ import 'design/app_theme_data.dart';
 import 'firebase_options.dart';
 import 'routes/routes.dart';
 
+bool? hasInternet;
 Future<void> main() async {
+
+  void checkInternet() async {
+    hasInternet = await InternetConnectionChecker().hasConnection;
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
+  checkInternet();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -29,8 +38,10 @@ class _MyAppState extends State<MyApp> {
   final _auth = FirebaseAuth.instance;
   final NotificationService _notificationService = NotificationService();
 
+
+
   @override
-  void initState() {
+  void initState()  {
     super.initState();
     _notificationService.connect();
   }
@@ -43,7 +54,7 @@ class _MyAppState extends State<MyApp> {
       theme: AppThemeData.lightTheme(context),
       themeMode: ThemeMode.light,
       darkTheme: AppThemeData.darkTheme(context),
-      initialRoute: _auth.currentUser != null ? "home_screen" : "login_screen",
+      initialRoute: hasInternet! ? (_auth.currentUser != null ? "home_screen" : "login_screen"):"network_error_screen",
       onGenerateRoute: (settings) => routeTo(settings.name!),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:on_duty/views/network_error.dart';
 
 import '../views/edit_task.dart';
 import '../views/home.dart';
@@ -23,6 +24,7 @@ Map<String, Widget> _routes = {
   "notifications_screen": const NotificationsScreen(),
   "new_task_screen": const NewTaskScreen(),
   "edit_task_screen": const EditTaskScreen(),
+  "network_error_screen": const NetworkErrorScreen(),
 };
 
 Route routeTo(String route) {
