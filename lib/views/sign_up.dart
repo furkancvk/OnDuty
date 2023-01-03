@@ -86,6 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 24),
                   PasswordFieldWithVisibility(
+                    showForgotPassword: false,
                     controller: _passwordController,
                   ),
                   const SizedBox(height: 16),

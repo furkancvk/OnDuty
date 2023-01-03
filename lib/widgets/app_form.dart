@@ -3,6 +3,8 @@ import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:on_duty/widgets/app_alerts.dart';
+import 'package:on_duty/widgets/resetPassword_modal.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
@@ -268,9 +270,6 @@ class AppForm {
     );
   }
 
-
-
-
   // static Widget appSearchableDropDownField({
   //   required List<String> items,
   //   required String label,
@@ -315,9 +314,11 @@ class AppForm {
 }
 
 class PasswordFieldWithVisibility extends StatefulWidget {
-  const PasswordFieldWithVisibility({Key? key, required this.controller})
+  const PasswordFieldWithVisibility({Key? key, required this.controller, Widget? this.content,required bool this.showForgotPassword})
       : super(key: key);
   final TextEditingController controller;
+  final Widget? content;
+  final bool showForgotPassword;
 
   @override
   State<PasswordFieldWithVisibility> createState() =>
@@ -367,11 +368,21 @@ class _PasswordFieldWithVisibilityState
             ),
           ],
         ),
-        Positioned(
-          right: 0,
-          top: 0,
-          child: Text("Şifremi Unuttum", style: AppText.label),
-        ),
+
+        widget.showForgotPassword ? Positioned(
+          right: -10,
+          top: -15,
+          child: TextButton(
+              child: Text("Şifremi Unuttum"),
+              onPressed: () => {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return widget.content!;
+                        }),
+
+                  }),
+        ):Container()
       ],
     );
   }

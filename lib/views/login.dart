@@ -8,6 +8,7 @@ import '../design/app_colors.dart';
 import '../design/app_text.dart';
 import '../storage/storage.dart';
 import '../widgets/app_alerts.dart';
+import '../widgets/resetPassword_modal.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -83,6 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   PasswordFieldWithVisibility(
+                    showForgotPassword: true,
+                    content: const ResetPasswordModal(),
                     controller: _passwordController,
                   ),
                   const SizedBox(height: 8),
