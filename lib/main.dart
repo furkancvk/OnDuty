@@ -17,9 +17,9 @@ Future<void> main() async {
   void checkInternet() async {
     hasInternet = await InternetConnectionChecker().hasConnection;
   }
-
-  WidgetsFlutterBinding.ensureInitialized();
   checkInternet();
+  WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -48,6 +48,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    hasInternet ??= false;
     return MaterialApp(
       title: "On Duty",
       debugShowCheckedModeBanner: false,
