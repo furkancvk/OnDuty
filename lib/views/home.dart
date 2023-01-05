@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             IconButton(
               splashRadius: 24,
-              onPressed: logOut,
+              onPressed: () => showMessageLogOut(context),
               icon: const Icon(FluentIcons.arrow_exit_20_regular),
             ),
             const SizedBox(width: 12),
@@ -165,8 +165,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             .contains(_searchQuery.toLowerCase()))
                         .toList();
 
-                    if (tasks.isEmpty)
+                    if (tasks.isEmpty) {
                       return Image.asset("assets/images/list_empty.png");
+                    }
 
                     return Column(
                       children: tasks.map((task) {
@@ -247,6 +248,8 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
     );
+
+
   }
 
   void setDisplayName() {
@@ -294,4 +297,45 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchController.dispose();
     super.dispose();
   }
+  void showMessageLogOut(context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Çıkış Yap",
+            textAlign: TextAlign.center,
+            style: AppText.titleSemiBold,
+          ),
+          content: const Text(
+            "Çıkış yapmak istediğinizden emin misiniz?",
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actionsPadding: const EdgeInsets.only(bottom: 24),
+          actions: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.lightError),
+              ),
+              child: const Text(
+                "Evet, çıkış yap",
+                style: TextStyle(color: AppColors.lightError),
+              ),
+              onPressed: (){
+                Navigator.pop(context);
+                logOut();
+              },
+            ),
+            ElevatedButton(
+              child: const Text("Hayır, devam et"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        );
+      },
+    );
+  }
+
 }
+

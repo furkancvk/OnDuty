@@ -87,6 +87,42 @@ class AppCards {
       },
     );
   }
+  static void showMessageLogOut(id, context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Çıkış Yap",
+            textAlign: TextAlign.center,
+            style: AppText.titleSemiBold,
+          ),
+          content: const Text(
+            "Çıkış yapmak istediğinizden emin misiniz?",
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actionsPadding: const EdgeInsets.only(bottom: 24),
+          actions: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.lightError),
+              ),
+              child: const Text(
+                "Evet, çıkış yap",
+                style: TextStyle(color: AppColors.lightError),
+              ),
+              onPressed: () => deleteTask(id, context),
+            ),
+            ElevatedButton(
+              child: const Text("Hayır, devam et"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        );
+      },
+    );
+  }
 
   static void showMessageCompleteTask(task, context) async {
     showDialog(
