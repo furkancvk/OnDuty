@@ -55,6 +55,8 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   int importance = 1;
 
   void addTask() {
+    NotificationService notificationService = NotificationService();
+
     TaskModel newTask = TaskModel(
       title: _titleController.text,
       description: _descriptionController.text,
@@ -75,6 +77,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
         .then((value) => {
               Navigator.pop(context),
               AppAlerts.toast(message: "Görev başarıyla oluşturuldu."),
+              notificationService.create(_auth.currentUser?.uid, selectedUser.uid, value.id, "Yeni görev atandı!", true),
             });
   }
 

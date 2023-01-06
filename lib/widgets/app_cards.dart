@@ -40,7 +40,7 @@ class AppCards {
         .then((value) => {
               Navigator.pop(context),
               AppAlerts.toast(message: "Yuppi! Görevi tamamladın."),
-              notificationService.create(_auth.currentUser?.uid, "Görev tamamlandı", task.description),
+              notificationService.create(_auth.currentUser?.uid, "9qATBkfTqbba4y72INDl7SASmcu1", newTask.uid, "Görev tamamlandı!", false),
             });
   }
 

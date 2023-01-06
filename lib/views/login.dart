@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/views/sign_up.dart';
 import 'package:on_duty/widgets/app_form.dart';
@@ -150,6 +152,28 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> saveTokenToDatabase(String token) async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .update({
+      'tokens': FieldValue.arrayUnion([token]),
+    });
+  }
+
+  Future<void> setupToken() async {
+    // Get the token each time the application loads
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    // Save the initial token to the database
+    await saveTokenToDatabase(token!);
+
+    // Any time the token refreshes, store this in the database too.
+    FirebaseMessaging.instance.onTokenRefresh.listen(saveTokenToDatabase);
+  }
+
   void logIn() async {
     if(isChecked) {
       await secureStorage.writeSecureData('rememberMeEmail', _emailController.text);
@@ -164,7 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
-      ).then((value) => {
+      ).then((value) async => {
+        await setupToken(),
         setState(() => isLoading = false),
         Navigator.pushReplacementNamed(context, 'home_screen'),
         AppAlerts.toast(message: "Başarıyla giriş yapıldı."),

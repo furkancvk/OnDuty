@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:on_duty/design/app_colors.dart';
 import 'package:on_duty/widgets/app_cards.dart';
+import 'package:provider/provider.dart';
+
+import '../states/states.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -33,7 +36,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               } else if (snapshot.data?.size == 0) {
                 return Image.asset("assets/images/empty_notification.png");
               } else {
-                return Column(
+                return ListView(
                   children: snapshot.data!.docs.map((item) {
                     Map<String, dynamic> notification = item.data()! as Map<String, dynamic>;
                     Map<String, dynamic> _notification = {"uid": item.id, ...notification};

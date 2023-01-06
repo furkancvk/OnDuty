@@ -23,13 +23,13 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        uid: json["uid"] as String,
+        uid: json["uid"] as String?,
         firstName: json["firstName"] as String,
         lastName: json["lastName"] as String,
         email: json["email"] as String,
         isAdmin: json["isAdmin"] as bool,
         password: json["password"] as String?,
-        createdAt: json["createdAt"] as Timestamp,
+        // createdAt: json["createdAt"] as Timestamp,
         // updatedAt: json["updatedAt"] as DateTime,
       );
 

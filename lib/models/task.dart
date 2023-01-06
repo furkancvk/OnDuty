@@ -32,8 +32,8 @@ class TaskModel {
         importance: json["importance"] as int,
         user: UserModel.fromJson(json["user"]),
         isCompleted: json["isCompleted"] as bool,
-        dueDate: json["dueDate"] as Timestamp,
-        createdAt: json["createdAt"] as Timestamp,
+        // dueDate: json["dueDate"] as Timestamp,
+        // createdAt: json["createdAt"] as Timestamp,
         // updatedAt: json["updatedAt"] as DateTime,
       );
 

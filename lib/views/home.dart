@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
 import '../models/task.dart';
 import '../models/user.dart';
+import '../states/states.dart';
 import '../utils/helpers.dart';
 import '../widgets/app_cards.dart';
 
@@ -41,10 +44,16 @@ class _HomeScreenState extends State<HomeScreen> {
     isAdmin = false;
     setDisplayName();
     setIsAdmin();
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if(isAdmin) Navigator.pushNamed(context, "notifications_screen");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isNewNotification = Provider.of<States>(context).newNotification;
+    Function changeNewNotification = Provider.of<States>(context).changeNewNotification;
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -52,11 +61,31 @@ class _HomeScreenState extends State<HomeScreen> {
           title: const Text("Ana Sayfa"),
           actions: [
             if (isAdmin)
-              IconButton(
-                splashRadius: 24,
-                onPressed: () =>
-                    Navigator.pushNamed(context, "notifications_screen"),
-                icon: const Icon(Iconsax.notification),
+              Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  IconButton(
+                    splashRadius: 24,
+                    onPressed: () => {
+                      Navigator.pushNamed(context, "notifications_screen"),
+                      changeNewNotification(false),
+                    },
+                    icon: const Icon(Iconsax.notification),
+                  ),
+                  if(isNewNotification) Positioned(
+                    top: 16,
+                    right: 14,
+                    child: Container(
+                      height: 9,
+                      width: 9,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                        border: Border.all(width: 1, color: AppColors.lightSecondary),
+                      ),
+                    ),
+                  )
+                ],
               ),
             IconButton(
               splashRadius: 24,
@@ -297,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchController.dispose();
     super.dispose();
   }
+
   void showMessageLogOut(context) async {
     showDialog(
       context: context,

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/models/user.dart';
 import 'package:on_duty/views/login.dart';
@@ -224,6 +225,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
         .set(newUser);
   }
 
+  Future<void> saveTokenToDatabase(String token) async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .update({
+      'tokens': FieldValue.arrayUnion([token]),
+    });
+  }
+
+  Future<void> setupToken() async {
+    // Get the token each time the application loads
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    // Save the initial token to the database
+    await saveTokenToDatabase(token!);
+
+    // Any time the token refreshes, store this in the database too.
+    FirebaseMessaging.instance.onTokenRefresh.listen(saveTokenToDatabase);
+  }
+
   void signUp() async {
     if (_formKey.currentState!.validate()) {
       if (isChecked) {
@@ -235,8 +258,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             )
             .then((value) async => {
                   addUser(),
-                  await _auth.currentUser!
-                      .updateDisplayName(_firstnameController.text),
+                  await _auth.currentUser!.updateDisplayName(_firstnameController.text),
+                  await setupToken(),
                   setState(() => isLoading = false),
                   Navigator.pushReplacementNamed(context, 'home_screen'),
                   AppAlerts.toast(message: "Başarıyla giriş yapıldı."),
