@@ -7,9 +7,8 @@ class UserModel {
   String? email;
   bool? isAdmin;
   String? password;
+  // FieldValue? tokens;
   Timestamp? createdAt;
-
-  // DateTime? updatedAt;
 
   UserModel({
     this.uid,
@@ -18,8 +17,8 @@ class UserModel {
     this.email,
     this.isAdmin,
     this.password,
+    // this.tokens,
     this.createdAt,
-    // this.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
@@ -29,8 +28,8 @@ class UserModel {
         email: json["email"] as String,
         isAdmin: json["isAdmin"] as bool,
         password: json["password"] as String?,
-        // createdAt: json["createdAt"] as Timestamp,
-        // updatedAt: json["updatedAt"] as DateTime,
+        // tokens: json["tokens"] as FieldValue,
+        createdAt: json["createdAt"] as Timestamp,
       );
 
   Map<String, dynamic> toJson() => {
@@ -40,8 +39,8 @@ class UserModel {
         "email": email,
         "isAdmin": isAdmin,
         "password": password,
+        // "tokens": tokens,
         "createdAt": createdAt,
-        // "updatedAt": updatedAt,
       };
 
   factory UserModel.fromFirestore(
@@ -56,6 +55,7 @@ class UserModel {
       email: data?['email'],
       isAdmin: data?['isAdmin'],
       password: data?['password'],
+      // tokens: data?['tokens'],
       createdAt: data?['createdAt'],
     );
   }
@@ -68,6 +68,7 @@ class UserModel {
       if (email != null) "email": email,
       if (isAdmin != null) "isAdmin": isAdmin,
       if (password != null) "password": password,
+      // if (tokens != null) "tokens": tokens,
       if (createdAt != null) "createdAt": createdAt,
     };
   }

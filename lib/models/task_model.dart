@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:on_duty/models/user.dart';
+import 'package:on_duty/models/user_model.dart';
 
 class TaskModel {
   String? uid;

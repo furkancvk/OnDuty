@@ -4,12 +4,13 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:on_duty/design/app_colors.dart';
-import 'package:on_duty/models/task.dart';
+import 'package:on_duty/models/task_model.dart';
 import 'package:on_duty/services/notification_service.dart';
-import 'package:on_duty/widgets/app_form.dart';
+import 'package:on_duty/widgets/inputs/date_input.dart';
+import 'package:on_duty/widgets/inputs/text_input.dart';
 
 import '../design/app_text.dart';
-import '../models/user.dart';
+import '../models/user_model.dart';
 import '../widgets/app_alerts.dart';
 
 class NewTaskScreen extends StatefulWidget {
@@ -64,7 +65,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       user: selectedUser,
       isCompleted: false,
       // dueDate: _dueDateController.text,
-      dueDate: Timestamp.fromDate(_dateTime!),
+      dueDate: Timestamp.fromDate(DateInput.date!),
       createdAt: Timestamp.now(),
     );
 
@@ -100,16 +101,16 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
           padding: const EdgeInsets.all(24.0),
           child: ListView(
             children: [
-              AppForm.appTextFormField(
+              TextInput(
+                controller: _titleController,
                 label: "Başlık",
                 hint: "Görevi tanımlayınız",
-                controller: _titleController,
               ),
               const SizedBox(height: 24),
-              AppForm.appTextFormField(
+              TextInput(
+                controller: _descriptionController,
                 label: "İçerik",
                 hint: "Görevi özetleyiniz",
-                controller: _descriptionController,
                 maxLines: 5,
               ),
               const SizedBox(height: 24),
@@ -117,54 +118,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                      flex: 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Son Tarih', style: AppText.labelSemiBold),
-                          const SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () {
-
-                              showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate:
-                              DateTime.now().subtract(Duration(days: 0)),
-                              lastDate: DateTime(2999),
-                            ).then((date) => setState(() {
-                              _dateTime = date!;
-                            }));}
-                            ,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                      color: AppColors.lightPrimary)),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _dateTime == null
-                                        ? DateFormat.yMd("tr").format(now)
-                                        : DateFormat.yMd("tr")
-                                            .format(_dateTime!),
-                                    style: AppText.context,
-                                  ),
-                                  Icon(
-                                    FluentIcons.calendar_ltr_24_regular,
-                                    color: AppColors.lightPrimary,
-                                  )
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                      ),
+                    flex: 1,
+                    child: DateInput(label: "Son Tarih", initialDate: DateTime.now()),
+                  ),
                   const SizedBox(width: 20),
                   Expanded(
                     flex: 1,

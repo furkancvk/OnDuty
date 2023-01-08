@@ -2,14 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:on_duty/models/user.dart';
+import 'package:on_duty/models/user_model.dart';
+import 'package:on_duty/services/auth_service.dart';
 import 'package:on_duty/views/login.dart';
 import 'package:on_duty/widgets/app_alerts.dart';
+import 'package:on_duty/widgets/inputs/password_input.dart';
+import 'package:on_duty/widgets/inputs/text_input.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
-import '../widgets/app_form.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -20,8 +22,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _auth = FirebaseAuth.instance;
-  final CollectionReference _users =
-      FirebaseFirestore.instance.collection('users');
+  final CollectionReference _users = FirebaseFirestore.instance.collection('users');
 
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
@@ -60,35 +61,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: AppForm.appTextFormFieldRegex(
+                        child: TextInput(
+                          controller: _firstnameController,
                           label: "İsim",
                           hint: "Ahmet",
-                          controller: _firstnameController,
                           formatter: nameRegExp,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: AppForm.appTextFormFieldRegex(
+                        child: TextInput(
+                          controller: _lastnameController,
                           label: "Soyisim",
                           hint: "Temiz",
-                          controller: _lastnameController,
                           formatter: nameRegExp,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  AppForm.appTextFormField(
+                  TextInput(
+                    controller: _emailController,
                     label: "Email",
                     hint: "isminiz@domain.com",
-                    controller: _emailController,
                     isEmail: true,
                   ),
                   const SizedBox(height: 24),
-                  PasswordFieldWithVisibility(
-                    showForgotPassword: false,
+                  PasswordInput(
                     controller: _passwordController,
+                    hint: "Şifre 6 ila 18 karakter olmalı",
+                    isForgotPassword: false,
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -299,6 +301,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
+
+  /*void signUp() async {
+    if(isChecked){
+      setState(() => isLoading = true);
+      await _authService.signUp(
+        _emailController.text,
+        _passwordController.text,
+        _firstnameController.text,
+        _lastnameController.text,
+        _formKey,
+      ).then((value) => {
+        setState(() => isLoading = false),
+        Navigator.pushReplacementNamed(context, 'home_screen'),
+      }).catchError((e) => {setState(() => isLoading = false)});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          padding: EdgeInsets.all(20),
+          content: Text("Kaydolmak için kutucuğu işaretleyiniz."),
+          duration: Duration(milliseconds: 1500),
+        ),
+      );
+    }
+  }*/
 
   @override
   void dispose() {

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:on_duty/design/app_colors.dart';
-import 'package:on_duty/widgets/app_cards.dart';
+import 'package:on_duty/widgets/cards/notification_card.dart';
 import 'package:provider/provider.dart';
 
 import '../states/states.dart';

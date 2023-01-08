@@ -5,15 +5,21 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:on_duty/widgets/cards/task_card.dart';
+import 'package:on_duty/widgets/inputs/date_input.dart';
+import 'package:on_duty/widgets/modals/alert_modal.dart';
 import 'package:provider/provider.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
-import '../models/task.dart';
-import '../models/user.dart';
+import '../models/task_model.dart';
+import '../models/user_model.dart';
+import '../services/notification_service.dart';
 import '../states/states.dart';
 import '../utils/helpers.dart';
-import '../widgets/app_cards.dart';
+import '../widgets/app_alerts.dart';
+import '../widgets/inputs/text_input.dart';
+import 'edit_task.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -33,10 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
   final TextEditingController _searchController = TextEditingController();
+  static final CollectionReference _tasks =
+  FirebaseFirestore.instance.collection('tasks');
 
   late bool isAdmin;
   String _searchQuery = "";
   String _displayName = "";
+  DateTime? selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -122,37 +131,13 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.lightPrimary.withOpacity(.16),
             ),
             const SizedBox(height: 24),
-            TextFormField(
+            TextInput(
               controller: _searchController,
-              onChanged: (String value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              decoration: const InputDecoration(
-                suffixIcon: Icon(
-                  FluentIcons.search_24_filled,
-                  color: AppColors.lightPrimary,
-                ),
-                hintText: "Görev Ara...",
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.lightInfo),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(4),
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(4),
-                    bottomRight: Radius.circular(4),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.lightPrimary),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(4),
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(4),
-                    bottomRight: Radius.circular(4),
-                  ),
-                ),
+              onChanged: (String value) => setState(() => _searchQuery = value),
+              hint: "Görev Ara...",
+              suffixIcon: const Icon(
+                FluentIcons.search_24_filled,
+                color: AppColors.lightPrimary,
               ),
             ),
             const SizedBox(height: 24),
@@ -163,8 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             StreamBuilder<QuerySnapshot<TaskModel>>(
                 stream: _tasksStream
-                    .where('user.uid',
-                        isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
+                    .where('user.uid', isEqualTo: isAdmin ? null : _auth.currentUser?.uid)
                     .where('isCompleted', isEqualTo: false)
                     .orderBy('importance', descending: false)
                     .orderBy('createdAt', descending: true)
@@ -188,11 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return taskData;
                     }).toList();
 
-                    tasks = tasks
-                        .where((s) => s.title
-                            .toLowerCase()
-                            .contains(_searchQuery.toLowerCase()))
-                        .toList();
+                    tasks = tasks.where((s) => s.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
 
                     if (tasks.isEmpty) {
                       return Image.asset("assets/images/list_empty.png");
@@ -200,67 +180,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return Column(
                       children: tasks.map((task) {
-                        return Column(
-                          children: [
-                            AppCards.taskCard(
-                              task: task,
-                              context: context,
-                              itemBuilder: (context) => [
-                                if (isAdmin)
-                                  PopupMenuItem(
-                                    value: 1,
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          FluentIcons.edit_24_regular,
-                                          color: AppColors.lightPrimary,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          "Düzenle",
-                                          style: AppText.contextSemiBold,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                if (isAdmin)
-                                  PopupMenuItem(
-                                    value: 2,
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          FluentIcons.delete_24_regular,
-                                          color: AppColors.lightPrimary,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          "Sil",
-                                          style: AppText.contextSemiBold,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                if (!isAdmin)
-                                  PopupMenuItem(
-                                    value: 3,
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          FluentIcons.checkmark_24_regular,
-                                          color: AppColors.lightPrimary,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          "Tamamla",
-                                          style: AppText.contextSemiBold,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
+                        List<Map<String, dynamic>> data = [
+                          if(isAdmin) {
+                            "title": "Düzenle",
+                            "icon": FluentIcons.edit_24_regular,
+                            "onPress": () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => EditTaskScreen(task: task),
+                              ),
                             ),
-                            const SizedBox(height: 16),
-                          ],
+                          },
+                          if(isAdmin) {
+                            "title": "Sil",
+                            "icon": FluentIcons.delete_24_regular,
+                            "onPress": () => showMessageDeleteTask(task.uid, context),
+                          },
+                          if(!isAdmin) {
+                            "title": "Tamamla",
+                            "icon": FluentIcons.checkmark_24_regular,
+                            "onPress": () => showMessageCompleteTask(task, context),
+                          }
+                        ];
+                        
+                        return TaskCard(
+                          margin: const EdgeInsets.only(bottom: 24),
+                          task: task,
+                          data: data,
                         );
                       }).toList(),
                     );
@@ -277,8 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
       ),
     );
-
-
   }
 
   void setDisplayName() {
@@ -331,36 +274,112 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(
-            "Çıkış Yap",
-            textAlign: TextAlign.center,
-            style: AppText.titleSemiBold,
-          ),
-          content: const Text(
-            "Çıkış yapmak istediğinizden emin misiniz?",
-            textAlign: TextAlign.center,
-          ),
-          actionsAlignment: MainAxisAlignment.spaceEvenly,
-          actionsPadding: const EdgeInsets.only(bottom: 24),
+        return AlertModal(
+          title: "Çıkış Yap",
+          content: "Çıkış yapmak istediğinizden emin misiniz?",
+          actions: [
+            OutlinedButton(
+              child: const Text("Evet, çıkış yap"),
+              onPressed: () => logOut(),
+            ),
+            ElevatedButton(
+              child: const Text("Geri dön"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void completeTask(TaskModel task, context) {
+    NotificationService notificationService = NotificationService();
+
+    TaskModel newTask = TaskModel(
+      uid: task.uid,
+      title: task.title,
+      description: task.description,
+      importance: task.importance,
+      user: task.user,
+      isCompleted: true,
+      dueDate: task.dueDate,
+      createdAt: task.createdAt,
+    );
+
+    _tasks
+        .withConverter(
+      fromFirestore: TaskModel.fromFirestore,
+      toFirestore: (TaskModel task, options) => task.toFirestore(),
+    )
+        .doc(task.uid)
+        .update(newTask.toJson())
+        .then((value) => {
+      Navigator.pop(context),
+      AppAlerts.toast(message: "Yuppi! Görevi tamamladın."),
+      notificationService.create(_auth.currentUser?.uid, "9qATBkfTqbba4y72INDl7SASmcu1", newTask.uid, "Görev tamamlandı!", false),
+    });
+  }
+
+   void deleteTask(id, context) async {
+    _tasks.doc(id).delete().then((value) => {
+      Navigator.pop(context),
+      AppAlerts.toast(message: "Görev başarıyla silindi."),
+    });
+  }
+
+   void showMessageDeleteTask(id, context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertModal(
+          title: "Görev Sil",
+          content: "Seçtiğiniz görevi silmek üzereseniz, emin misiniz?\nBu işlem geri alınamaz.",
           actions: [
             OutlinedButton(
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.lightError),
               ),
               child: const Text(
-                "Evet, çıkış yap",
+                "Evet, sil",
                 style: TextStyle(color: AppColors.lightError),
               ),
-              onPressed: (){
-                Navigator.pop(context);
-                logOut();
-              },
+              onPressed: () => deleteTask(id, context),
             ),
             ElevatedButton(
-              child: const Text("Hayır, devam et"),
+              child: const Text("Hayır, silme"),
               onPressed: () => Navigator.of(context).pop(),
-            )
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+   void showMessageCompleteTask(task, context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Görev Tamamla",
+            textAlign: TextAlign.center,
+            style: AppText.titleSemiBold,
+          ),
+          content: const Text(
+            "Seçtiğiniz görevin tamamlandığından, emin misiniz? Admin bu işlemden haberdar olacaktır.",
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: const EdgeInsets.only(bottom: 24),
+          actions: [
+            ElevatedButton(
+              child: const Text("Evet, tamamla"),
+              onPressed: () => completeTask(task, context),
+            ),
+            OutlinedButton(
+              child: const Text("Hayır, kapat"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
           ],
         );
       },

@@ -3,14 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:on_duty/views/sign_up.dart';
-import 'package:on_duty/widgets/app_form.dart';
+import 'package:on_duty/widgets/inputs/password_input.dart';
+import 'package:on_duty/widgets/inputs/text_input.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../design/app_colors.dart';
 import '../design/app_text.dart';
 import '../storage/storage.dart';
 import '../widgets/app_alerts.dart';
-import '../widgets/resetPassword_modal.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -78,17 +78,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: AppText.context,
                   ),
                   const SizedBox(height: 32),
-                  AppForm.appTextFormField(
+                  TextInput(
+                    controller: _emailController,
                     label: "Email",
                     hint: "isminiz@domain.com",
-                    controller: _emailController,
                     isEmail: true,
                   ),
                   const SizedBox(height: 24),
-                  PasswordFieldWithVisibility(
-                    showForgotPassword: true,
-                    content: const ResetPasswordModal(),
+                  PasswordInput(
                     controller: _passwordController,
+                    hint: "Şifre 6 ila 18 karakter olmalı",
                   ),
                   const SizedBox(height: 8),
                   Row(
